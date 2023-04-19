@@ -22,6 +22,7 @@ UlamScalars=<|
 TPTScalars=
 	<|
 	"normalized_reactive_density"->"\\mu^{AB}",
+	"density"->"P \\cdot i_0",
 	"pi_stationary"->"\\pi",
 	"remaining_time"->"t^{i \\mathbb{B}}",
 	"q_plus"->"q^{+}"
@@ -132,8 +133,7 @@ Options[PolygonColors]=Join[
 
 PolygonColors[fulam_, scalar_, opts:OptionsPattern[]]:=
 	With[
-	{Scalar=OptionValue[Scalar], PlotExponent = OptionValue[PlotExponent], 
-	PolygonOpacity = OptionValue[PolygonOpacity], PolygonColorFunction = OptionValue[PolygonColorFunction],
+	{PlotExponent = OptionValue[PlotExponent], PolygonOpacity = OptionValue[PolygonOpacity], PolygonColorFunction = OptionValue[PolygonColorFunction],
 	AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor]}, 
 	Module[{polys, polysDis, indsA, indsB, indsAvoid, maxScalar, polycolor, polycolorDis},
 		{polys, polysDis} = ParseHDF5Polygons[fulam];
@@ -176,7 +176,7 @@ ScalarLegend[scalar_,opts:OptionsPattern[]]:=
 	With[
 	{ScalarLegendLabel=OptionValue[ScalarLegendLabel],ScalarLegendPlaced=OptionValue[ScalarLegendPlaced],ScalarLegendLabelMag=OptionValue[ScalarLegendLabelMag],
 	ScalarLegendMarkerSize=OptionValue[ScalarLegendMarkerSize],ScalarLegendTickFontSize=OptionValue[ScalarLegendTickFontSize],
-	PolygonColorFunction=OptionValue[PolygonColorFunction], Scalar= OptionValue[Scalar],PlotExponent= OptionValue[PlotExponent]}, 
+	PolygonColorFunction=OptionValue[PolygonColorFunction], PlotExponent= OptionValue[PlotExponent]}, 
 	Module[{maxScalar = Max[scalar]},
 		Placed[
 			BarLegend[
@@ -210,9 +210,9 @@ Options[PlotScalar]=Join[
 					];
 
 PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
-	With[{WorldRange=OptionValue[WorldRange], Scalar=OptionValue[Scalar], PlotExponent = OptionValue[PlotExponent]}, 
+	With[{WorldRange=OptionValue[WorldRange], PlotExponent = OptionValue[PlotExponent]}, 
 	Module[{polyColor, polyColorDis, world},
-		{polyColor, polyColorDis} = PolygonColors[fulam, ftpt, InheritOpts[PlotScalar,PolygonColors,opts]];
+		{polyColor, polyColorDis} = PolygonColors[fulam, scalar, InheritOpts[PlotScalar,PolygonColors,opts]];
 		world = WorldPolygon[InheritOpts[PlotScalar,WorldPolygon,opts]];
 		Legended[
 			Legended[
@@ -233,32 +233,23 @@ PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
 ]
 
 
-PlotScalarSlicesOpts={};
+PlotScalarSlicesOpts={RasterizeFrames->True, StartAtZero->True, EndFrame->-1};
 Options[PlotScalarSlices]=Join[
 					PlotScalarSlicesOpts,
 					Options[PlotScalar]
 					];
 
-PlotScalarSlices[fulam_, ftpt_, opts:OptionsPattern[]] :=
-	With[{WorldRange=OptionValue[WorldRange], Scalar=OptionValue[Scalar], PlotExponent = OptionValue[PlotExponent]}, 
-	Module[{scalar, maxScalar, polyColor, polyColorDis, world},
-		{polyColor, polyColorDis, maxScalar} = PolygonColors[fulam, ftpt, InheritOpts[PlotScalar,PolygonColors,opts]];
-		world = WorldPolygon[InheritOpts[PlotScalar,WorldPolygon,opts]];
-		Legended[
-			Legended[
-				Graphics[
-					Join[polyColor, polyColorDis, world], 
-					PlotRange -> WorldRange, 
-					Frame -> True, 
-					FrameTicks -> WorldTicks[InheritOpts[PlotScalar,WorldTicks,opts]],
-					FrameTicksStyle-> Directive[Black, 20], 
-					PlotRangeClipping -> True, 
-					FrameLabel -> {{None, None}, {None, None}}, 
-					ImageSize -> 800], 
-			ABLegend[InheritOpts[PlotScalar,ABLegend,opts]]
-			], 
-		ScalarLegend[maxScalar, InheritOpts[PlotScalar,ScalarLegend,opts]]
-		]
+PlotScalarSlices[fulam_, scalar_, opts:OptionsPattern[]] :=
+	With[{RasterizeFrames=OptionValue[RasterizeFrames],StartAtZero=OptionValue[StartAtZero],EndFrame=OptionValue[EndFrame]}, 
+	Module[{slice, frames = {}},
+		Do[
+			slice=scalar[[All,i]];
+			If[RasterizeFrames,
+				AppendTo[frames, Rasterize[PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]],
+				AppendTo[frames, PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]
+			];
+		,{i,If[StartAtZero,1,2],If[EndFrame==-1,Dimensions[scalar][[2]],EndFrame]}];
+		frames
 	]
 ]
 
@@ -273,32 +264,46 @@ DecimalForm[Transpose[{loc[[All,2]],loc[[All,1]]}],3]
 
 
 ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_stat_test.h5";
+scalar=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
 Options[PlotScalar]//Sort//MatrixForm
 
 
 Graphics[ParseHDF5Polygons[fulam]]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
+s=PlotScalar[fulam, scalar,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None]
 
 
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"counts", PlotExponent->1/4, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
+Export["/Users/gagebonner/Desktop/mu-stat.png",s]
 
 
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"counts", PlotExponent->1/4, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
+ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_nonstat_test.h5";
+scalarMU=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
+fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
+framesMU=PlotScalarSlices[fulam, scalarMU, 
+	StartAtZero->False,EndFrame->-1,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+ListAnimate[framesMU,AnimationRunning->False]
 
 
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"counts", PlotExponent->1/4, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
+
+Export["/Users/gagebonner/Desktop/mu-nonstat.gif",framesMU]
 
 
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
-PlotScalar[fulam, ftpt, WorldRange->{{-100,15},{-9,39}}, Scalar->"counts", PlotExponent->1/4, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}]
+ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_nonstat_test.h5";
+scalarDEN=Import[ftpt,"/tpt_homog/statistics/density"];
+fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
+framesDEN=PlotScalarSlices[fulam, scalarDEN, 
+	StartAtZero->False,EndFrame->-1,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+ListAnimate[framesDEN,AnimationRunning->False]
+
+
+Export["/Users/gagebonner/Desktop/push-forward.gif",framesDEN]
+
+
+(* ::Section:: *)
+(*Under Construction*)
 
 
 FCurrent[fulam_,ftpt_]:=Module[{centers,fplus,ci,fi,fres},
