@@ -233,34 +233,22 @@ PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
 ]
 
 
-PlotScalarSlicesOpts={RasterizeFrames->True, StartAtZero->True, EndFrame->-1};
+PlotScalarSlicesOpts={EndFrame->-1};
 Options[PlotScalarSlices]=Join[
 					PlotScalarSlicesOpts,
 					Options[PlotScalar]
 					];
 
 PlotScalarSlices[fulam_, scalar_, opts:OptionsPattern[]] :=
-	With[{RasterizeFrames=OptionValue[RasterizeFrames],StartAtZero=OptionValue[StartAtZero],EndFrame=OptionValue[EndFrame]}, 
+	With[{EndFrame=OptionValue[EndFrame]}, 
 	Module[{slice, frames = {}},
 		Do[
 			slice=scalar[[All,i]];
-			If[RasterizeFrames,
-				AppendTo[frames, Rasterize[PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]],
-				AppendTo[frames, PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]
-			];
-		,{i,If[StartAtZero,1,2],If[EndFrame==-1,Dimensions[scalar][[2]],EndFrame]}];
+			AppendTo[frames, PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]
+		,{i,1,If[EndFrame==-1,Dimensions[scalar][[2]],EndFrame]}];
 		frames
 	]
 ]
-
-
-GeoGraphics[GeoMarker[{1,1}],PlotRange->{{-100,15},{-9,39}},ImageSize->1200];
-
-
-loc={{4.816699218750011, 6.957486979166633}, {0.05909830729167709, 6.821223958333306}, {0.08268229166668561, 11.197363281250006`}, {4.248437500000016, 11.104150390624994`}};
-
-
-DecimalForm[Transpose[{loc[[All,2]],loc[[All,1]]}],3]
 
 
 ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_stat_test.h5";
@@ -271,7 +259,7 @@ Options[PlotScalar]//Sort//MatrixForm
 
 Graphics[ParseHDF5Polygons[fulam]]
 s=PlotScalar[fulam, scalar,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None]
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None]
 
 
 Export["/Users/gagebonner/Desktop/mu-stat.png",s]
@@ -281,8 +269,8 @@ ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_non
 scalarMU=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
 framesMU=PlotScalarSlices[fulam, scalarMU, 
-	StartAtZero->False,EndFrame->-1,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+	EndFrame->-1,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
 ListAnimate[framesMU,AnimationRunning->False]
 
 
@@ -294,12 +282,18 @@ ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_non
 scalarDEN=Import[ftpt,"/tpt_homog/statistics/density"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
 framesDEN=PlotScalarSlices[fulam, scalarDEN, 
-	StartAtZero->False,EndFrame->-1,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+	EndFrame->-1,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
 ListAnimate[framesDEN,AnimationRunning->False]
 
 
 Export["/Users/gagebonner/Desktop/push-forward.gif",framesDEN]
+
+
+famesCOMP=Table[Grid[{{framesMU[[i]]},{framesDEN[[i]]}}],{i,1,Length[framesMU]}];
+
+
+Export["/Users/gagebonner/Desktop/mu-comp.gif",famesCOMP]
 
 
 (* ::Section:: *)
