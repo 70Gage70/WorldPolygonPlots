@@ -16,7 +16,7 @@ SetDirectory[NotebookDirectory[]];
 
 
 UlamScalars=<|
-	"counts"->"\\text{cts.}"
+	"counts"->"\\text{counts}"
 	|>;
 
 TPTScalars=
@@ -200,7 +200,11 @@ ScalarLegend[scalar_,opts:OptionsPattern[]]:=
 	]
 
 
-PlotScalarOpts={WorldRange->{{-100,-59},{6,32}}};
+(* ::Subsection:: *)
+(*PlotScalar*)
+
+
+PlotScalarOpts={WorldRange->{{-100,-59},{6,32}}, PlotScalarImageSize->800};
 Options[PlotScalar]=Join[
 					PlotScalarOpts,
 					ScalarLegendOpts,
@@ -210,7 +214,7 @@ Options[PlotScalar]=Join[
 					];
 
 PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
-	With[{WorldRange=OptionValue[WorldRange], PlotExponent = OptionValue[PlotExponent]}, 
+	With[{WorldRange=OptionValue[WorldRange], PlotExponent=OptionValue[PlotExponent], PlotScalarImageSize=OptionValue[PlotScalarImageSize]}, 
 	Module[{polyColor, polyColorDis, world},
 		{polyColor, polyColorDis} = PolygonColors[fulam, scalar, InheritOpts[PlotScalar,PolygonColors,opts]];
 		world = WorldPolygon[InheritOpts[PlotScalar,WorldPolygon,opts]];
@@ -224,13 +228,17 @@ PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
 					FrameTicksStyle-> Directive[Black, 20], 
 					PlotRangeClipping -> True, 
 					FrameLabel -> {{None, None}, {None, None}}, 
-					ImageSize -> 800], 
+					ImageSize -> PlotScalarImageSize], 
 			ABLegend[InheritOpts[PlotScalar,ABLegend,opts]]
 			], 
 		ScalarLegend[scalar, InheritOpts[PlotScalar,ScalarLegend,opts]]
 		]
 	]
 ]
+
+
+(* ::Subsection:: *)
+(*PlotScalarSlices*)
 
 
 PlotScalarSlicesOpts={EndFrame->-1};
@@ -251,15 +259,42 @@ PlotScalarSlices[fulam_, scalar_, opts:OptionsPattern[]] :=
 ]
 
 
-ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_stat_test.h5";
-scalar=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
-fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
 Options[PlotScalar]//Sort//MatrixForm
 
 
+ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
+scalarmu=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
+scalarpi=Import[ftpt,"/tpt_homog/statistics/pi_stationary"];
+fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
+
 Graphics[ParseHDF5Polygons[fulam]]
-s=PlotScalar[fulam, scalar,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None]
+s=PlotScalar[fulam, scalarmu,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
+	ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	ABPlaced->{0.077,0.22}, AvoidColor->LightGray]
+s=PlotScalar[fulam, scalarpi,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
+	ScalarLegendLabel->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	ABPlaced->{0.077,0.22}]
+
+
+Polygon[{{10.9, 0.6}, {10.9, 3.8}, {14.2, 3.8}, {14.2, 0.6}}]
+
+
+ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_stat_test.h5";
+scalarmu=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
+scalarpi=Import[ftpt,"/tpt_homog/statistics/pi_stationary"];
+fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
+
+Graphics[ParseHDF5Polygons[fulam]]
+s=PlotScalar[fulam, scalarmu,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
+	ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	ABPlaced->{0.077,0.22}, AvoidColor->LightGray]
+s=PlotScalar[fulam, scalarpi,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
+	ScalarLegendLabel->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	ABPlaced->{0.077,0.22}]
 
 
 Export["/Users/gagebonner/Desktop/mu-stat.png",s]
@@ -372,52 +407,52 @@ plot
 ]
 
 
- vor={{100.0,   281.499},
- {121.0,   239.995},
- {142.0,   306.265},
- {163.0,   277.168},
- {184.0,  246.145},
- {205.0,   651.11},
- {226.0,   488.669},
- {247.0,   530.332},
- {268.0,   606.368},
- {289.0,   641.524},
- {310.0,  1157.43},
- {331.0,   687.108},
- {352.0,   576.756},
- {373.0,   920.653},
- {394.0,   843.99},
- {415.0,   875.188},
- {436.0,   832.674},
- {457.0,   986.424},
- {478.0,  1220.52},
- {500.0,  1453.72}};
- vor=Table[{vor[[i,1]],Log10[vor[[i,2]]*5/365]},{i,1,Length[vor]}]
- ListPlot[vor]
+(* ::Section:: *)
+(*Extras*)
 
 
-reg={ {142.0,   410.677},
- {158.0,   257.117},
- {180.0,   386.862},
- {205.0,   731.095},
- {215.0,   333.68},
- {236.0,   652.826},
- {255.0,   452.652},
- {279.0,   317.513},
- {288.0,  1836.43},
- {317.0,   310.305},
- {329.0,  2383.11},
- {357.0,  2643.47},
- {366.0,  2475.84},
- {399.0,   542.185},
- {410.0,   655.257},
- {419.0,  2052.68},
- {450.0,  1821.04},
- {465.0,   617.491},
- {491.0,  2492.59},
- {502.0,  1494.06}};
- reg=Table[{reg[[i,1]],Log10[reg[[i,2]]*5/365]},{i,1,Length[reg]}]
- ListPlot[reg]
+x0=Flatten[Import["/Users/gagebonner/Desktop/Repositories/UlamMethod.jl/src/data/x0x5-NA-undrogued.h5","/x0"]];
+y0=Flatten[Import["/Users/gagebonner/Desktop/Repositories/UlamMethod.jl/src/data/x0x5-NA-undrogued.h5","/y0"]];
+xT=Flatten[Import["/Users/gagebonner/Desktop/Repositories/UlamMethod.jl/src/data/x0x5-NA-undrogued.h5","/xT"]];
+yT=Flatten[Import["/Users/gagebonner/Desktop/Repositories/UlamMethod.jl/src/data/x0x5-NA-undrogued.h5","/yT"]];
 
 
-ListPlot[{reg,vor}]
+trajLength=Table[Sqrt[(x0[[i]]-xT[[i]])^2+(y0[[i]]-yT[[i]])^2],{i,1,Length[x0]}];
+
+
+HistogramList
+
+
+Histogram[
+	trajLength,
+	{0, 3, 0.1},
+	Frame->{{True,False},{True,False}},
+	FrameTicks->{
+		{{0,MaTeX["0",Magnification->2],{0,0.01}},{1,MaTeX["1",Magnification->2],{0,0.01}}, {2,MaTeX["2",Magnification->2],{0,0.01}}, {3,MaTeX["3",Magnification->2],{0,0.01}}},
+		{{0,MaTeX["0",Magnification->2],{0,0.01}},{10^4,MaTeX["1 \\times 10^4",Magnification->2],{0,0.01}}, {2*10^4,MaTeX["2\\times 10^4",Magnification->2],{0,0.01}},{3*10^4,MaTeX["3\\times 10^4",Magnification->2],{0,0.01}},{4*10^4,MaTeX["4\\times 10^4",Magnification->2],{0,0.01}}}
+	},
+	PlotRange->{{0.06,3},{0,40000}},
+	FrameLabel->{
+		{MaTeX["\\text{Counts}", Magnification->2], None},
+		{MaTeX["||\\vec{x}_0 - \\vec{x}_T||", Magnification->2], None}
+	},
+	ChartStyle->{Directive[LightGray,EdgeForm[Black]]},
+	ImageSize->800
+]
+
+
+ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
+scalarmu=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
+scalarpi=Import[ftpt,"/tpt_homog/statistics/pi_stationary"];
+scalarcounts=Import[ftpt,"/ulam/counts"];
+fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
+
+Graphics[ParseHDF5Polygons[fulam]]
+s=PlotScalar[fulam, scalarcounts,
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
+	ScalarLegendLabel->"counts", PlotExponent->1/2, ScalarLegendPlaced->{0.9,0.6}, ScalarLegendLabelMag->1.2, 
+	ABPlaced->{0.077,0.18}, ABLegendMag->1.8,
+	AvoidColor->None]
+
+
+Options[PlotScalar]//MatrixForm
