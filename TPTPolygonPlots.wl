@@ -108,12 +108,6 @@ WorldPolygon[opts:OptionsPattern[]]:=
 	]
 
 
-WorldTicks[]
-
-
-GeoTick[-5, GeoTickLatLon->"Lon"]
-
-
 (* ::Subsection:: *)
 (*Parsing Polygons and TPT Indices*)
 

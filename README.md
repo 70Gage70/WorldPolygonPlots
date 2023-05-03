@@ -17,13 +17,9 @@ SetDirectory[NotebookDirectory[]];
 <<FancyGeoFrame`
 ```
 
-Then, we can construct a frame.
+Then, we can construct a frame. If there are an even number of X and Y ticks, the frame will have four black corners and therefore look slightly nicer, but it isn't required. Note also that the range of the plot is defined by the largest and smallest elements of the ticks we provide.
 
 ```mathematica
-(*
-The frame will have four black corners can therefore look slightly nicer if there 
-are an even number of X and Y ticks, but it isn't required.
-*)
 ticksX={110,115,120,125,130,135,140};
 ticksY={20,23,26,29,32,35};
 
@@ -33,7 +29,11 @@ ticksY={20,23,26,29,32,35};
     FancyTicksMag->2.5, 
     FancyTicksAngle->{0,-5}*Pi/180,
     FancyTicksYDelta->0.2];
+```
 
+The output of `FancyGeoFrame` is `{frame, newrange}`, where `GeoRange->Reverse[newrange]` should be passed as an option to `GeoGraphics` to ensure that the labels are visible. We will plot landmasses to show how multiple graphics objects can be combined with `frame`.
+
+```mathematica
 world={
     GeoStyling[Opacity[1]], 
     FaceForm[LightGray], 
