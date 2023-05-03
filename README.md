@@ -10,13 +10,18 @@ Wolfram Language/Mathematica tools for high quality plots of densities supported
 
 Ensure that [`MaTeX`](http://szhorvat.net/pelican/latex-typesetting-in-mathematica.html) is installed. If you don't want to use MaTeX, replace the function `GeoTick` inside the package with a function mapping longitudes/latitudes to strings.
 
-Copy the file `FancyGeoFrame.wl` into your working directory. 
+Copy the file `FancyGeoFrame.wl` into your working directory and load it as follows
+
+```mathematica
+SetDirectory[NotebookDirectory[]];
+<<FancyGeoFrame`
+```
+
+Then, we can construct a frame.
 
 ```mathematica
 ticksX={110,115,120,125,130,135,140};
 ticksY={20,23,26,29,32,35};
-
-world={GeoStyling[Opacity[1]], FaceForm[LightGray], EdgeForm[None], CountryData["World", "Polygon"]};
 
 {frame,newrange} = FancyGeoFrame[ticksX, ticksY, 
     FancyBoxesSize->{{0.5,0.5},{0.45,0.45}},
@@ -24,6 +29,13 @@ world={GeoStyling[Opacity[1]], FaceForm[LightGray], EdgeForm[None], CountryData[
     FancyTicksMag->2.5, 
     FancyTicksAngle->{0,-5}*Pi/180,
     FancyTicksYDelta->0.2];
+
+world={
+    GeoStyling[Opacity[1]], 
+    FaceForm[LightGray], 
+    EdgeForm[None], 
+    CountryData["World", "Polygon"]
+    };
 
 GeoGraphics[
 	Join[world,frame],
