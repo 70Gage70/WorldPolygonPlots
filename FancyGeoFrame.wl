@@ -4,48 +4,24 @@
 (*FancyGeoFrame*)
 
 
-BeginPackage["WLHelpers`"]
+BeginPackage["FancyGeoFrame`"]
 
 FancyGeoFrame::usage = 
-"InheritOpts[funcOuter,funcOpts,inputOpts] is a helper function for defining functions which need to take their own options as well as the options for some other function.
-					
-funcOuter is the current function you're defining.
-funcOpts is the function whose options you want to make passable to the current function.
-inputOpts is the OptionsPattern from the current function definition (i.e. that the user will pass or not pass.)
+"FancyGeoFrame[FancyTicksX,FancyTicksX,opts] creates an alternating series of black and white boxes with degree labels suitable for use with GeoGraphics. FancyTicksX and FancyTicksY are the longitude, latitude values at which tick marks will be placed."
 
-The result of InheritOpts should be passed as options to instances of funcOpts in funcOuter.
-"
 
-NumberToTeXString::usage = 
-"NumberToTeXString[num, prec] returns a string in LaTeX form suitable for use with MaTeX.
-
-num is the number
-prec is the number of digits of precision you want in the number (default 3)
-"
-							
-FractionToInlineLaTeX::usage = 
-"FractionToLaTeX[num] converts a/b to a flat fraction (i.e. not \\frac) suitable for use with MaTeX.
-
-num is the (rational) number
-"
+Begin["`Private`"]
 
 
 (* ::Subsection:: *)
 (*Dependencies*)
 
 
-SetDirectory[NotebookDirectory[]];
-
 <<MaTeX`
-<<EurekaColors`
-<<WLHelpers`
-
-
-(*constants*)
 
 
 (* ::Subsection:: *)
-(*FancyFrame*)
+(*Construction Helpers*)
 
 
 GeoTickOpts={GeoTickLatLon->"Arb", GeoTickMag->1.8};
@@ -102,6 +78,10 @@ TicksPaddingBoxes[ftSize_,xmin_,xmax_,ymin_,ymax_]:=
 	]
 
 
+(* ::Subsection:: *)
+(*FancyGeoFrame*)
+
+
 FancyGeoFrameOpts={FancyBoxesSize->{{3, 3},{3, 3}}, FancyTicksPadding->{3,3}, FancyTicksMag->1.8, FancyGridlinesOpacity->0.2, FancyTicksAngle->{0,0}, FancyTicksYDelta->0};
 Options[FancyGeoFrame]=FancyGeoFrameOpts;
 
@@ -137,18 +117,7 @@ FancyGeoFrame[FancyTicksX_, FancyTicksY_, opts:OptionsPattern[]]:=
 	]
 
 
-ticksX={0, -10, -20, -30, -40, -67};
-ticksY={46, 50, 53, 57, 61, 66};
-gr=Reverse[{{-67, 0},{46, 66}}];
-fbSize={{1,1},{0.75,0.75}};
-worldtest={GeoStyling[Opacity[1]], FaceForm[Gray], EdgeForm[None], CountryData["World", "Polygon"]};
-{frame,newrange} = FancyGeoFrame[ticksX, ticksY, FancyBoxesSize->fbSize, FancyTicksPadding->{2,7.5},FancyTicksMag->2.5, FancyTicksAngle->{-13,-12}*\[Pi]/180,FancyTicksYDelta->1];
-GeoGraphics[
-	Join[worldtest,frame],
-	GeoRange->Reverse[newrange],
-	GeoRangePadding->{None,None},
-	GeoBackground->None,
-	GeoGridLines->None,
-	GeoProjection->"Albers",
-	ImageSize->1100
-]
+End[]
+
+
+EndPackage[]

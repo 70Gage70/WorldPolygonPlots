@@ -76,38 +76,3 @@ End[]
 
 
 EndPackage[]
-
-
-(*
-ABLegendOpts={AColor->Hue[0.83,0.68,1.0], BColor->Red, DisconColor->Black, AvoidColor->LightGray, ABPlaced->{0.077,0.18}};
-Options[ABLegend]=Join[
-					ABLegendOpts,
-					{Magnification->1.8}
-					];
-
-ABLegend[opts:OptionsPattern[]]:=
-	With[{AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor], ABPlaced = OptionValue[ABPlaced]}, 
-	Module[{colors,labels,valid,legs,optsMaTeXeval},
-		colors={AColor,BColor,DisconColor,AvoidColor};
-		optsMaTeXeval=InheritOpts[ABLegend,MaTeX,opts];
-		labels={MaTeX["\\mathbb{A}",optsMaTeXeval],
-				MaTeX["\\mathbb{B}",optsMaTeXeval],
-				MaTeX["\\text{Discon.}",optsMaTeXeval],
-				MaTeX["\\text{Avoid}",optsMaTeXeval]};
-		valid=Flatten[Position[colors, _?(ColorQ[#]&)]];
-		colors=colors[[valid]];
-		labels=labels[[valid]];
-		Placed[
-			SwatchLegend[
-				colors,
-				labels,
-				LegendMarkerSize->12,
-				LegendMarkers->Table[
-								Graphics[{EdgeForm[Directive[Thin,Black]],Rectangle[]}],
-							{i,1,Length[colors]}]
-				],
-			ABPlaced
-			]
-		]
-	]
-*)
