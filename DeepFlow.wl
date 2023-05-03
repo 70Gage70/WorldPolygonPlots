@@ -106,38 +106,44 @@ BlackWhiteBoxes[fbSize_,ticksX_,ticksY_]:=
 	
 TicksPaddingBoxes[ftSize_,xmin_,xmax_,ymin_,ymax_]:=
 	Module[{ftX, ftY, xPad, yPad},
-		{ftX, ftY}=ftSize;
-		padTicksX=ticksX;padTicksX[[1]]=padTicksX[[1]]-fbYL;padTicksX[[-1]]=padTicksX[[-1]]+fbYR;
-		boxesBottom={GeoStyling[Opacity[1]],FaceForm[White],EdgeForm[None],GBR[xmin,xmax,ymin-FancyTicksPadding[[2]],ymin]};
-		boxesLeft=Table[{GeoStyling[Opacity[1]],FaceForm[If[OddQ[i],Black,White]],EdgeForm[Black],GBR[xmin-fbYL,xmin,ticksY[[i]],ticksY[[i+1]]]},{i,1,Length[ticksY]-1}];
-		Join[boxesBottom,boxesLeft]
+		{ftY, ftX}=ftSize;
+		xPad={GeoStyling[Opacity[1]],FaceForm[White],EdgeForm[None],GBR[xmin-ftX,xmax,ymin-ftY,ymin]};
+		yPad={GeoStyling[Opacity[1]],FaceForm[White],EdgeForm[None],GBR[xmin-ftX,xmin,ymin,ymax]};
+		Join[xPad,yPad]
 	]
 
 
-FancyFrameOpts={FancyTicksX->{0, -3, -20, -30, -40, -67}, FancyTicksY->{46, 50, 53, 60, 61, 66}, FancyBoxesSize->{{3, 3},{3, 3}}, FancyTicksPadding->{3,3}};
+FancyFrameOpts={FancyTicksX->{0, -3, -20, -30, -40, -67}, FancyTicksY->{46, 50, 53, 60, 61, 66}, FancyBoxesSize->{{3, 3},{3, 3}}, FancyTicksPadding->{3,3}, FancyTicksMag->1.8, FancyTicksYAngle->0};
 Options[FancyFrame]=FancyFrameOpts;
 
 FancyFrame[opts:OptionsPattern[]]:=
-	With[{FancyTicksX = Sort[OptionValue[FancyTicksX]], FancyTicksY = Sort[OptionValue[FancyTicksY]], FancyBoxesSize = OptionValue[FancyBoxesSize], FancyTicksPadding = OptionValue[FancyTicksPadding]}, 
-	Module[{xmin, xmax, ymin, ymax, bwboxes, newrange, xLabelsPad, xLabels},
+	With[{
+		FancyTicksX = Sort[OptionValue[FancyTicksX]], 
+		FancyTicksY = Sort[OptionValue[FancyTicksY]], 
+		FancyBoxesSize = OptionValue[FancyBoxesSize], 
+		FancyTicksPadding = OptionValue[FancyTicksPadding], 
+		FancyTicksMag = OptionValue[FancyTicksMag], 
+		FancyTicksYAngle = OptionValue[FancyTicksYAngle]}, 
+	Module[{xmin, xmax, ymin, ymax, xgridlines, ygridlines, bwboxes, ticksboxes, newrange, xLabels, yLabels},
 		{xmin,xmax}=MinMax[FancyTicksX];
 		{ymin,ymax}=MinMax[FancyTicksY];
+		xgridlines=Table[{Opacity[0.2],Black,GeoPath[{{ymin,FancyTicksX[[i]]},{ymax,FancyTicksX[[i]]}},"Rhumb"]},{i,1,Length[FancyTicksX]}];
+		ygridlines=Table[{Opacity[0.2],Black,GeoPath[{{FancyTicksY[[i]],xmin},{FancyTicksY[[i]],xmax}},"Rhumb"]},{i,1,Length[FancyTicksX]}];
 		bwboxes=BlackWhiteBoxes[FancyBoxesSize,FancyTicksX,FancyTicksY];
 		{{xmin,xmax},{ymin,ymax}}={{xmin,xmax},{ymin,ymax}}+FancyBoxesSize*{{-1,1},{-1,1}};
-		xLabelsPad={GeoStyling[Opacity[1]],FaceForm[White],EdgeForm[None],GBR[xmin,xmax,ymin-FancyTicksPadding[[2]],ymin]};
-		newrange={{xmin,xmax},{ymin,ymax}}-{{FancyTicksPadding[[1]],0},{FancyTicksPadding[[2]],0}};
-		{Join[bwboxes,xLabelsPad],newrange}
+		ticksboxes=TicksPaddingBoxes[FancyTicksPadding,xmin,xmax,ymin,ymax];
+		newrange={{xmin,xmax},{ymin,ymax}}-{{FancyTicksPadding[[2]],0},{FancyTicksPadding[[1]],0}};
+		xLabels=Table[GeoMarker[{ymin-FancyTicksPadding[[1]]/2,FancyTicksX[[i]]},Text[GeoTick[FancyTicksX[[i]],GeoTickLatLon->"Lon",GeoTickMag->FancyTicksMag]],"Alignment"->Center,"Scale"->Scaled[1]],{i,1,Length[FancyTicksX]}];
+		yLabels=Table[GeoMarker[{FancyTicksY[[i]],xmin-FancyTicksPadding[[2]]/2},Rotate[Text[GeoTick[FancyTicksY[[i]],GeoTickLatLon->"Lat",GeoTickMag->FancyTicksMag]],FancyTicksYAngle],"Alignment"->Center,"Scale"->Scaled[1]],{i,1,Length[FancyTicksY]}];
+		{Join[xgridlines, ygridlines, bwboxes,ticksboxes,xLabels,yLabels],newrange}
 		]
 	]
 
 
-GeoGraphics[{GeoStyling[Opacity[1]],FaceForm[Red],GBR[-67, 0, 43, 46]}]
-
-
 gr=Reverse[{{-67, 0},{46, 66}}];
 fbSize={{1,1},{1,1}};
-worldtest={GeoStyling[Opacity[1]], FaceForm[Blue], EdgeForm[None], CountryData["World", "Polygon"]};
-{frame,newrange} = FancyFrame[FancyBoxesSize->fbSize, FancyTicksPadding->{3,3}];
+worldtest={GeoStyling[Opacity[1]], FaceForm[Gray], EdgeForm[None], CountryData["World", "Polygon"]};
+{frame,newrange} = FancyFrame[FancyBoxesSize->fbSize, FancyTicksPadding->{2,7},FancyTicksMag->3, FancyTicksYAngle->(-10)*\[Pi]/180];
 GeoGraphics[
 	Join[worldtest,frame],
 	PlotLabel->MaTeX["test",Magnification->2.0],
