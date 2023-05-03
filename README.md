@@ -55,11 +55,11 @@ GeoGraphics[
 ### Options
 
 - `FancyBoxesSize -> {{left, right}, {bottom, top}}` specifies the width of the boxes on each side.
-- `FancyTicksPadding->{bottom, left}` specifies how far away the tick  labels are from the frame.
+- `FancyTicksPadding->{bottom, left}` specifies how far away the tick labels are from the frame.
 - `FancyTicksMag->mag` specifies how large the tick labels are.
 - `FancyGridlinesOpacity->op` specifies the opacity of the gridlines.
-- `FancyTicksAngle->{bottom, left}` specifies the rotation of the labels. On the y axis, the labels are rotated uniformly and on the x axis they are rotated concentrically. This can make the labels look nicer if their angle roughly matches the angle of the gridlines. 
-- `FancyTicksYDelta->delta` specifies the "slope" of the labels on the y axis. This can make the labels look nicer if the lower labels are too far away from the y axis.
+- `FancyTicksAngle->{bottom, left}` specifies the rotation of the labels. On the y axis, the labels are rotated uniformly and on the x axis they are rotated concentrically. The labels can look slightly nicer if this option is chosen so that their angle roughly matches the angle of the gridlines. 
+- `FancyTicksYDelta->delta` specifies the "slope" of the labels on the y axis. The labels can look slightly nicer if this option is chosen so that the distance of the labels from the y axis is roughly constant.
 
 ## TPTPolygonPlots
 
