@@ -21,8 +21,8 @@ Then, we can construct a frame.
 
 ```mathematica
 (*
-The frame will have four black corners can therefore look slightly nicer if there are an even number 
-of X and Y ticks, but it isn't required.
+The frame will have four black corners can therefore look slightly nicer if there 
+are an even number of X and Y ticks, but it isn't required.
 *)
 ticksX={110,115,120,125,130,135,140};
 ticksY={20,23,26,29,32,35};
