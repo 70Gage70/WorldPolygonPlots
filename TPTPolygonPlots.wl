@@ -63,7 +63,23 @@ ABLegend[opts:OptionsPattern[]]:=
 
 
 (* ::Subsection:: *)
-(*WorldTicks and WorldPolygon*)
+(*GeoTick, WorldTicks and WorldPolygon*)
+
+
+GeoTickOpts={GeoTickLatLon->"Arb", GeoTickMag->1.8};
+Options[GeoTick]=GeoTickOpts;
+
+GeoTick[coord_,opts:OptionsPattern[]]:=	
+	With[{GeoTickLatLon=OptionValue[GeoTickLatLon], GeoTickMag=OptionValue[GeoTickMag]},
+	Module[{degree},
+		degree = Which[
+			GeoTickLatLon == "Lon", Which[coord<0, "^\\circ \\text{W}", coord>0, "^\\circ \\text{E}", coord==0, "^\\circ"],
+			GeoTickLatLon == "Lat", Which[coord<0, "^\\circ \\text{S}", coord>0, "^\\circ \\text{N}", coord==0, "^\\circ"],
+			GeoTickLatLon == "Arb", "^\\circ"
+			];
+		MaTeX[ToString[Abs[coord]]<>degree,Magnification->GeoTickMag]
+		]
+	]
 
 
 WorldTicksOpts={WorldTicksX->{-100,-80,-59}, WorldTicksY->{6,20,32}, WorldTicksMag->1.8};
@@ -71,18 +87,17 @@ Options[WorldTicks]=WorldTicksOpts;
 
 WorldTicks[opts:OptionsPattern[]]:=
 	With[{WorldTicksX=OptionValue[WorldTicksX], WorldTicksY=OptionValue[WorldTicksY], WorldTicksMag=OptionValue[WorldTicksMag]},
-	Module[{x,y,xEW,yNS},
-		xEW[xt_]:=Which[xt<0, "^\\circ \\text{W}", xt>0, "^\\circ \\text{E}", xt==0, "^\\circ"];
-		yNS[yt_]:=Which[yt<0, "^\\circ \\text{S}", yt>0, "^\\circ \\text{N}", yt==0, "^\\circ"];
-		x=Table[{xt,MaTeX[ToString[Abs[xt]]<>xEW[xt],Magnification->WorldTicksMag],{0,0.01}},
+	Module[{x,y},
+		x=Table[{xt, GeoTick[xt, GeoTickLatLon->"Lon", GeoTickMag->WorldTicksMag], {0,0.01}},
 			{xt,WorldTicksX}
 		];
-		y=Table[{yt,MaTeX[ToString[Abs[yt]]<>yNS[yt],Magnification->WorldTicksMag],{0,0.01}},
+		y=Table[{yt, GeoTick[yt, GeoTickLatLon->"Lat", GeoTickMag->WorldTicksMag], {0,0.01}},
 			{yt,WorldTicksY}
 		];
 		{{y,None},{x,None}}
 		]
 	]
+
 
 WorldPolygonOpts={WorldOpacity->1, WorldColor->RGBColor[0.65, 0.65, 0.65]};
 Options[WorldPolygon]=WorldPolygonOpts;
@@ -91,6 +106,12 @@ WorldPolygon[opts:OptionsPattern[]]:=
 	With[{WorldOpacity=OptionValue[WorldOpacity], WorldColor=OptionValue[WorldColor]},
 		{Opacity[WorldOpacity], FaceForm[WorldColor], EdgeForm[None], CountryData["World", "Polygon"]}
 	]
+
+
+WorldTicks[]
+
+
+GeoTick[-5, GeoTickLatLon->"Lon"]
 
 
 (* ::Subsection:: *)
