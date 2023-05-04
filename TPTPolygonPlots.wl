@@ -13,6 +13,10 @@ SetDirectory[NotebookDirectory[]];
 <<MaTeX`
 <<EurekaColors`
 <<WLHelpers`
+<<ABLegend`
+<<GeoTick`
+<<WorldPolygons`
+<<ParseHDF5`
 
 
 UlamScalars=<|
@@ -30,138 +34,40 @@ TPTScalars=
 
 
 (* ::Subsection:: *)
-(*ABLegend*)
-
-
-ABLegendOpts={AColor->Hue[0.83,0.68,1.0], BColor->Red, DisconColor->Black, AvoidColor->LightGray, ABPlaced->{0.077,0.18}, ABLegendMag->1.8};
-Options[ABLegend]=ABLegendOpts;
-
-ABLegend[opts:OptionsPattern[]]:=
-	With[{AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor], ABPlaced = OptionValue[ABPlaced], ABLegendMag = OptionValue[ABLegendMag]}, 
-	Module[{colors,labels,valid,legs},
-		colors={AColor,BColor,DisconColor,AvoidColor};
-		labels={MaTeX["\\mathbb{A}", Magnification->ABLegendMag],
-				MaTeX["\\mathbb{B}", Magnification->ABLegendMag],
-				MaTeX["\\text{Discon.}", Magnification->ABLegendMag],
-				MaTeX["\\text{Avoid}", Magnification->ABLegendMag]};
-		valid=Flatten[Position[colors, _?(ColorQ[#]&)]];
-		colors=colors[[valid]];
-		labels=labels[[valid]];
-		Placed[
-			SwatchLegend[
-				colors,
-				labels,
-				LegendMarkerSize->12,
-				LegendMarkers->Table[
-								Graphics[{EdgeForm[Directive[Thin,Black]],Rectangle[]}],
-							{i,1,Length[colors]}]
-				],
-			ABPlaced
-			]
-		]
-	]
-
-
-(* ::Subsection:: *)
-(*GeoTick, WorldTicks and WorldPolygon*)
-
-
-GeoTickOpts={GeoTickLatLon->"Arb", GeoTickMag->1.8};
-Options[GeoTick]=GeoTickOpts;
-
-GeoTick[coord_,opts:OptionsPattern[]]:=	
-	With[{GeoTickLatLon=OptionValue[GeoTickLatLon], GeoTickMag=OptionValue[GeoTickMag]},
-	Module[{degree},
-		degree = Which[
-			GeoTickLatLon == "Lon", Which[coord<0, "^\\circ \\text{W}", coord>0, "^\\circ \\text{E}", coord==0, "^\\circ"],
-			GeoTickLatLon == "Lat", Which[coord<0, "^\\circ \\text{S}", coord>0, "^\\circ \\text{N}", coord==0, "^\\circ"],
-			GeoTickLatLon == "Arb", "^\\circ"
-			];
-		MaTeX[ToString[Abs[coord]]<>degree,Magnification->GeoTickMag]
-		]
-	]
-
-
-WorldTicksOpts={WorldTicksX->{-100,-80,-59}, WorldTicksY->{6,20,32}, WorldTicksMag->1.8};
-Options[WorldTicks]=WorldTicksOpts;
-
-WorldTicks[opts:OptionsPattern[]]:=
-	With[{WorldTicksX=OptionValue[WorldTicksX], WorldTicksY=OptionValue[WorldTicksY], WorldTicksMag=OptionValue[WorldTicksMag]},
-	Module[{x,y},
-		x=Table[{xt, GeoTick[xt, GeoTickLatLon->"Lon", GeoTickMag->WorldTicksMag], {0,0.01}},
-			{xt,WorldTicksX}
-		];
-		y=Table[{yt, GeoTick[yt, GeoTickLatLon->"Lat", GeoTickMag->WorldTicksMag], {0,0.01}},
-			{yt,WorldTicksY}
-		];
-		{{y,None},{x,None}}
-		]
-	]
-
-
-WorldPolygonOpts={WorldOpacity->1, WorldColor->RGBColor[0.65, 0.65, 0.65]};
-Options[WorldPolygon]=WorldPolygonOpts;
-
-WorldPolygon[opts:OptionsPattern[]]:=
-	With[{WorldOpacity=OptionValue[WorldOpacity], WorldColor=OptionValue[WorldColor]},
-		{Opacity[WorldOpacity], FaceForm[WorldColor], EdgeForm[None], CountryData["World", "Polygon"]}
-	]
-
-
-(* ::Subsection:: *)
-(*Parsing Polygons and TPT Indices*)
-
-
-ParseHDF5Polygons[fulam_]:=
-	Module[{polysin, vcells, polysdisin, vcellsdis},
-		polysin=Transpose[Import[fulam, "/ulam/polys"]];
-		vcells=Table[Polygon[Select[polysin, #[[3]] == i &][[All, 1;;2]]], {i, 1, Max[polysin[[All, 3]]]}];
-		vcellsdis=If[Import[fulam,"/ulam/n_polys_dis"]==0,
-			{},
-			polysdisin=Transpose[Import[fulam,"/ulam/polys_dis"]];
-			Table[Polygon[Select[polysdisin, #[[3]] == i &][[All, 1;;2]]], {i, 1, Max[polysdisin[[All, 3]]]}]
-			];
-		{vcells, vcellsdis}
-	]
-
-ParseABInds[ftpt_]:=
-	Module[
-	{
-	Ainds = Import[ftpt, "/tpt_homog/indices/A"], 
-	Binds = Import[ftpt, "/tpt_homog/indices/B"], 
-	indsAvoid
-	}, 
-		indsAvoid = Intersection[Ainds, Binds];
-		{Ainds, Binds, indsAvoid}
-	]
-
-
-(* ::Subsection:: *)
 (*PolygonColors*)
 
 
-PolygonColorsOpts={PlotExponent->1/4, PolygonOpacity->0.8, PolygonColorFunction->EurekaColorSmooth};
+PolygonColorsOpts={ScalarDirectory->"tpt_stat/statistics/normalized_reactive_density",PolygonOpacity->0.8, PolygonColorScaled->True, PolygonColorFunction->Function[EurekaColorSmooth[#^(1/4)]]};
 Options[PolygonColors]=Join[
 					PolygonColorsOpts,
-					Options[ABLegend]
+					Options[ABLegend],
+					Options[ParseHDF5Polygons],
+					Options[ParseABInds]
 					];
 
-PolygonColors[fulam_, scalar_, opts:OptionsPattern[]]:=
-	With[
-	{PlotExponent = OptionValue[PlotExponent], PolygonOpacity = OptionValue[PolygonOpacity], PolygonColorFunction = OptionValue[PolygonColorFunction],
-	AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor]}, 
+PolygonColors[file_, opts:OptionsPattern[]]:=
+	With[{
+	ScalarDirectory = OptionValue[ScalarDirectory], 
+	PolygonOpacity = OptionValue[PolygonOpacity],
+	PolygonColorScaled = OptionValue[PolygonColorScaled],
+	PolygonColorFunction = OptionValue[PolygonColorFunction],
+	AColor = OptionValue[AColor], 
+	BColor = OptionValue[BColor], 
+	DisconColor = OptionValue[DisconColor], 
+	AvoidColor = OptionValue[AvoidColor]}, 
 	Module[{polys, polysDis, indsA, indsB, indsAvoid, maxScalar, polycolor, polycolorDis},
-		{polys, polysDis} = ParseHDF5Polygons[fulam];
-		{indsA, indsB, indsAvoid}=ParseABInds[ftpt];
+		{polys, polysDis} = ParseHDF5Polygons[file, DelegateOptions[opts, PolygonColors]];
+		{indsA, indsB, indsAvoid}=ParseABInds[file, DelegateOptions[opts, PolygonColors]];
+		scalar=Import[file,ScalarDirectory];
 		If[Length[scalar]!=Length[polys],Print["Scalar and polys have different dimensions."]; Abort[]];
-		maxScalar=Max[scalar];
+		maxScalar=If[PolygonColorScaled,Max[scalar],1];
 		polycolor = 
 			Table[
 				Which[
 					MemberQ[indsAvoid, i],{FaceForm[AvoidColor], polys[[i]]},
 					MemberQ[indsA, i],{FaceForm[AColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
 					MemberQ[indsB, i],{FaceForm[BColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
-					True, {Opacity[PolygonOpacity], FaceForm[PolygonColorFunction[(scalar[[i]] / maxScalar)^(PlotExponent)]], EdgeForm[Directive[Thin, LightGray]], polys[[i]]}
+					True, {Opacity[PolygonOpacity], FaceForm[PolygonColorFunction[scalar[[i]]/maxScalar]], EdgeForm[Directive[Thin, LightGray]], polys[[i]]}
 					],
 			{i,1,Length[polys]}
 			];
@@ -173,6 +79,24 @@ PolygonColors[fulam_, scalar_, opts:OptionsPattern[]]:=
 		{polycolor, polycolorDis}
 		]	
 	]	
+
+
+Quit[]
+
+
+blurp=Function[EurekaColorSmooth[#^(1/4)]]
+
+
+blurp[0.3]
+
+
+Graphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",PolygonOpacity->1,AColor->Yellow,PolygonColorFunction->Function[EurekaColorSmooth[#^(1/8)]]]]
+
+
+GeoGraphics[{FaceForm[Red],GeoStyling[Opacity[1]],GeoPolygon[Reverse[{{-98.`,22.1`},{-97.49212121212122`,25.90909090909091`},{-93.68461538461538`,25.90909090909091`},{-93.68461538461538`,21.545454545454547`},{-97.60645161290323`,21.545454545454547`}},2]]}]
+
+
+GeoGraphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",PolyType->GeoPolygon,AColor->Yellow]]
 
 
 (* ::Subsection:: *)
@@ -272,6 +196,10 @@ PlotScalarSlices[fulam_, scalar_, opts:OptionsPattern[]] :=
 		frames
 	]
 ]
+
+
+(* ::Section:: *)
+(*Calculations*)
 
 
 Options[PlotScalar]//Sort//MatrixForm
@@ -471,3 +399,6 @@ s=PlotScalar[fulam, scalarcounts,
 
 
 Options[PlotScalar]//MatrixForm
+
+
+Export["/Users/gagebonner/Desktop/Rem Time Paper/new fgs/pdfs/tABboxT_vor.pdf",utVORcrop,Background->None];

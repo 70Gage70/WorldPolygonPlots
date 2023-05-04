@@ -6,15 +6,8 @@
 
 BeginPackage["WLHelpers`"]
 
-InheritOpts::usage = 
-"InheritOpts[funcOuter,funcOpts,inputOpts] is a helper function for defining functions which need to take their own options as well as the options for some other function.
-					
-funcOuter is the current function you're defining.
-funcOpts is the function whose options you want to make passable to the current function.
-inputOpts is the OptionsPattern from the current function definition (i.e. that the user will pass or not pass.)
-
-The result of InheritOpts should be passed as options to instances of funcOpts in funcOuter.
-"
+DelegateOptions::usage = "DelegateOptions[spec1, spec2, ...] returns a sequence of options, extracted from given spec[i], filtered for head surrounding delegateOptions expression. \
+Option specification speci can be explicit opt -> val rule or delayed rule, a symbol from which default options will be extracted, or a list of valid option specifications."
 
 NumberToTeXString::usage = 
 "NumberToTeXString[num, prec] returns a string in LaTeX form suitable for use with MaTeX.
@@ -25,12 +18,21 @@ prec is the number of digits of precision you want in the number (default 3)
 							
 FractionToInlineLaTeX::usage = 
 "FractionToLaTeX[num] converts a/b to a flat fraction (i.e. not \\frac) suitable for use with MaTeX.
-
-num is the (rational) number
 "
 
 
 Begin["`Private`"]
+
+
+(* ::Subsection:: *)
+(*Dependencies*)
+
+
+(*None*)
+
+
+(* ::Subsection:: *)
+(*InheritOpts*)
 
 
 InheritOpts[funcOuter_,funcOpts_,inputOpts:OptionsPattern[]]:=
@@ -44,6 +46,10 @@ InheritOpts[funcOuter_,funcOpts_,inputOpts:OptionsPattern[]]:=
 		];
 		replaceable
 	]
+
+
+(* ::Subsection:: *)
+(*NumberToTeXString*)
 
 
 NumberToTeXString[num_, prec_:3]:=
@@ -66,10 +72,29 @@ NumberToTeXString[num_, prec_:3]:=
 	]//Quiet
 
 
+(* ::Subsection:: *)
+(*FractionToInlineLaTeX*)
+
+
 FractionToInlineLaTeX[num_]:=
 	If[Denominator[num]==1,ToString[Numerator[num]],
 	ToString[Numerator[num]]<>"/"<>ToString[Denominator[num]]
 	]
+
+
+(* ::Subsection:: *)
+(*DelegateOptions*)
+
+
+DelegateOptions /: head_[args1___, DelegateOptions[opts___], args2___] :=
+    head[
+        args1,
+        Sequence @@ FilterRules[
+            Replace[Flatten[{opts}], sym_Symbol :> Options[sym], {1}], 
+            Options[head]
+        ],
+        args2
+    ]
 
 
 End[]
