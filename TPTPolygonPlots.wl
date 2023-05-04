@@ -32,6 +32,15 @@ TPTScalars=
 	|>;
 
 
+ParseABInds["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
+
+
+Graphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5", AColor->Yellow, PolygonOpacity->0.9][[1]]]
+
+
+GeoGraphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5", AColor->Yellow, PolygonOpacity->0.9, PolyOrGeoPoly->"GeoPolygon",PolygonColorTransform->Function[#^(1/8)]][[1]],GeoProjection->"Albers"]
+
+
 (* ::Subsection:: *)
 (*ABLegend*)
 

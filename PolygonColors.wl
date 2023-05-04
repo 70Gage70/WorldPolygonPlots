@@ -11,6 +11,7 @@ ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of poly
 ParseABInds::usage = "ParseABInds[file, opts] creates a list of TPT indices of A, B and the avoided region from the input file."
 
 PolygonColors::usage = "PolygonColors[file, opts] returns a list of {polys, polysdis}."
+	AColor::usage = "The color of A."
 
 
 Begin["`Private`"]
@@ -20,10 +21,12 @@ Begin["`Private`"]
 (*Dependencies*)
 
 
-(*None*)
+<<MaTeX`
+<<EurekaColors`
+<<WLHelpers`
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ParseHDF5Polygons*)
 
 
@@ -48,7 +51,7 @@ ParseHDF5Polygons[file_,opts:OptionsPattern[]]:=
 	]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ParseABInds*)
 
 
@@ -77,7 +80,8 @@ PolygonColorsOpts={
 	ScalarDirectory->"tpt_stat/statistics/normalized_reactive_density",
 	PolygonOpacity->0.8, 
 	PolygonColorScaled->True, 
-	PolygonColorFunction->Function[EurekaColorSmooth[#^(1/4)]],
+	PolygonColorFunction->EurekaColorSmooth,
+	PolygonColorTransform->Function[#^(1/4)],
 	AColor->Hue[0.83,0.68,1.0], 
 	BColor->Red, 
 	DisconColor->Black, 
@@ -95,12 +99,13 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 	PolygonOpacity = OptionValue[PolygonOpacity],
 	PolygonColorScaled = OptionValue[PolygonColorScaled],
 	PolygonColorFunction = OptionValue[PolygonColorFunction],
+	PolygonColorTransform = OptionValue[PolygonColorTransform],
 	AColor = OptionValue[AColor],
 	BColor = OptionValue[BColor],
 	DisconColor = OptionValue[DisconColor],
 	AvoidColor = OptionValue[AvoidColor],
 	PolyOrGeoPoly=OptionValue[PolyOrGeoPoly]}, 
-	Module[{polys, polysDis, GeoPolyOpacity, indsA, indsB, indsAvoid, maxScalar, polycolor, polycolorDis},
+	Module[{polys, polysDis, GeoPolyOpacity, indsA, indsB, indsAvoid, scalar, maxScalar, polycolor, polycolorDis},
 		{polys, polysDis} = ParseHDF5Polygons[file, DelegateOptions[opts, PolygonColors]];
 		{indsA, indsB, indsAvoid}=ParseABInds[file, DelegateOptions[opts, PolygonColors]];
 		scalar=Import[file,ScalarDirectory];
@@ -116,7 +121,7 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 					MemberQ[indsAvoid, i],{GeoPolyOpacity[1],FaceForm[AvoidColor], polys[[i]]},
 					MemberQ[indsA, i],{GeoPolyOpacity[1], FaceForm[AColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
 					MemberQ[indsB, i],{GeoPolyOpacity[1], FaceForm[BColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
-					True, {GeoPolyOpacity[PolygonOpacity], FaceForm[PolygonColorFunction[scalar[[i]]/maxScalar]], EdgeForm[Directive[Thin, LightGray]], polys[[i]]}
+					True, {GeoPolyOpacity[PolygonOpacity], FaceForm[PolygonColorFunction[PolygonColorTransform[scalar[[i]]/maxScalar]]], EdgeForm[Directive[Thin, LightGray]], polys[[i]]}
 					],
 			{i,1,Length[polys]}
 			];
