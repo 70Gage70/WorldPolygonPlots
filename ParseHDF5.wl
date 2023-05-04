@@ -25,20 +25,23 @@ Begin["`Private`"]
 (*ParseHDF5Polygons*)
 
 
-ParseHDF5PolygonsOpts={PolysDirectory->"/ulam/polys", NPolysDisDirectory->"/ulam/n_polys_dis", PolysDisDirectory->"/ulam/polys_dis", PolyType->Polygon};
+ParseHDF5PolygonsOpts={PolysDirectory->"/ulam/polys", NPolysDisDirectory->"/ulam/n_polys_dis", PolysDisDirectory->"/ulam/polys_dis", PolyType->"Polygon"};
 Options[ParseHDF5Polygons]=ParseHDF5PolygonsOpts;
 
 ParseHDF5Polygons[file_,opts:OptionsPattern[]]:=
 	With[{PolysDirectory=OptionValue[PolysDirectory], NPolysDisDirectory=OptionValue[NPolysDisDirectory], PolysDisDirectory=OptionValue[PolysDisDirectory], PolyType=OptionValue[PolyType]},
 	Module[{polysin, vcells, polysdisin, vcellsdis},
 		polysin=Transpose[Import[file, PolysDirectory]];
-		vcells=Table[PolyType[Select[polysin, #[[3]] == i &][[All, 1;;2]]], {i, 1, Max[polysin[[All, 3]]]}];
+		vcells=Table[Select[polysin, #[[3]] == i &][[All, 1;;2]], {i, 1, Max[polysin[[All, 3]]]}];
 		vcellsdis=If[Import[file,NPolysDisDirectory]==0,
 			{},
 			polysdisin=Transpose[Import[file,PolysDisDirectory]];
-			Table[PolyType[Select[polysdisin, #[[3]] == i &][[All, 1;;2]]], {i, 1, Max[polysdisin[[All, 3]]]}]
+			Table[Select[polysdisin, #[[3]] == i &][[All, 1;;2]], {i, 1, Max[polysdisin[[All, 3]]]}]
 			];
-		{vcells, vcellsdis}
+		Which[
+				PolyType=="Polygon", {Map[Polygon,vcells], Map[Polygon,vcellsdis]},
+				PolyType=="GeoPolygon", {Map[GeoPolygon,Reverse[vcells,3]], Map[GeoPolygon,Reverse[vcellsdis,3]]}
+			]
 		]
 	]
 
