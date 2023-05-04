@@ -6,8 +6,13 @@
 
 BeginPackage["FancyGeoFrame`"]
 
-FancyGeoFrame::usage = 
-"FancyGeoFrame[FancyTicksX,FancyTicksX,opts] creates an alternating series of black and white boxes with degree labels suitable for use with GeoGraphics. FancyTicksX and FancyTicksY are the longitude, latitude values at which tick marks will be placed."
+FancyGeoFrame::usage = "FancyGeoFrame[FancyTicksX,FancyTicksX,opts] creates an alternating series of black and white boxes with degree labels suitable for use with GeoGraphics. FancyTicksX and FancyTicksY are the longitude, latitude values at which tick marks will be placed."
+	FancyBoxesSize::usage = "The width of the boxes on each side in the form {{left, right}, {bottom, top}}."
+	FancyTicksPadding::usage = "How far away the tick labels are from the frame in the form {bottom, left}."
+	FancyTicksMag::usage = "The magnification of the tick labels."
+	FancyGridlinesOpacity::usage = "The opacity of the gridlines."
+	FancyTicksAngle::usage = "The rotation of the labels in the form {\[Theta]bottom, \[Theta]left}."
+	FancyTicksYDelta::usage = "The slope of the labels on the y axis."
 
 
 Begin["`Private`"]
@@ -20,7 +25,7 @@ Begin["`Private`"]
 <<MaTeX`
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Construction Helpers*)
 
 
@@ -92,7 +97,7 @@ FancyGeoFrame[FancyTicksX_, FancyTicksY_, opts:OptionsPattern[]]:=
 		FancyTicksMag = OptionValue[FancyTicksMag], 
 		FancyGridlinesOpacity = OptionValue[FancyGridlinesOpacity], 
 		FancyTicksAngle = OptionValue[FancyTicksAngle],
-		FancyTicksYDelta=OptionValue[FancyTicksYDelta]}, 
+		FancyTicksYDelta = OptionValue[FancyTicksYDelta]}, 
 	Module[{xmin, xmax, ymin, ymax, TicksX, TicksY, gridlines, bwboxes, ticksboxes, newrange, xLabels, yLabels, ftXAngle, ftYAngle, xCorrection, yCorrection},
 		TicksX=Sort[FancyTicksX];
 		TicksY=Sort[FancyTicksY];

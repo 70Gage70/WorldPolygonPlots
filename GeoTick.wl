@@ -7,8 +7,13 @@
 BeginPackage["GeoTick`"]
 
 GeoTick::usage = "GeoTick[coordinate] returns a TeX'd version of coordinate."
+	GeoTickLatLon::usage = "One of Arb (arbitrary), Lon (longitude) or Lat (latitude)."
+	GeoTickMag::usage = "The magnification of the GeoTick."
 
 WorldTicks::usage = "WorldTicks[opts] returns a TeX'd list of ticks suitable for use with FrameTicks."
+	WorldTicksX::usage = "The ticks on the x axis."
+	WorldTicksY::usage = "The ticks on the y axis."
+	WorldTicksMag::usage = "The magnification of the ticks."
 
 
 Begin["`Private`"]

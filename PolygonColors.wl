@@ -7,11 +7,25 @@
 BeginPackage["PolygonColors`"]
 
 ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of polygons and disconnected polygons from the vertices in the input file."
+	PolysDirectory::usage = "The directory in the HDF5 file for the polygon vertices."
+	NPolysDisDirectory::usage = "The directory in the HDF5 file for the number of disconnected polygons."
+	PolysDisDirectory::usage = "The directory in the HDF5 file for the disconnected polygon vertices."
+	PolyOrGeoPoly::usage = "Whether to parse the vertices as Polygon or GeoPolygon."
 
 ParseABInds::usage = "ParseABInds[file, opts] creates a list of TPT indices of A, B and the avoided region from the input file."
-
+	IndsADirectory::usage = "The directory in the HDF5 file for the A indices."
+	IndsBDirectory::usage = "The directory in the HDF5 file for the B indices."
+	
 PolygonColors::usage = "PolygonColors[file, opts] returns a list of {polys, polysdis}."
-	AColor::usage = "The color of A."
+	ScalarDirectory::usage = "The directory in the HDF5 file for the scalar quantity used to color the polygons."
+	PolygonOpacity::usage = "The opacity of the polygons the polygons."
+	PolygonColorScaled::usage = "Whether to scale the value of the scalar by its maximum."
+	PolygonColorFunction::usage = "A map from real numbers to colors."
+	PolygonColorTransform::usage = "A function that the values of the scalar will be transformed by."
+	AColor::usage = "The color of the A states."
+	BColor::usage = "The color of the B states."
+	DisconColor::usage = "The color of the disconnected states."
+	AvoidColor::usage = "The color of the avoided states."
 
 
 Begin["`Private`"]
@@ -26,7 +40,7 @@ Begin["`Private`"]
 <<WLHelpers`
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ParseHDF5Polygons*)
 
 
@@ -51,7 +65,7 @@ ParseHDF5Polygons[file_,opts:OptionsPattern[]]:=
 	]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ParseABInds*)
 
 

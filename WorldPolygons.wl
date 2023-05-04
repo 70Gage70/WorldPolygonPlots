@@ -7,7 +7,8 @@
 BeginPackage["WorldPolygons`"]
 
 WorldPolygon::usage = "WorldPolygon[] returns a Polygon representing Earth landmass."
-
+	WorldOpacity::usage = "The opacity of the landmass."
+	WorldColor::usage = "The color of the landmass."
 
 
 Begin["`Private`"]
