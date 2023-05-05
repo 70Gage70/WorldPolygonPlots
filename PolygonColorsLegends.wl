@@ -1,10 +1,10 @@
 (* ::Package:: *)
 
 (* ::Section:: *)
-(*PolygonColors*)
+(*PolygonColorsLegends*)
 
 
-BeginPackage["PolygonColors`"]
+BeginPackage["PolygonColorsLegends`"]
 
 ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of polygons and disconnected polygons from the vertices in the input file."
 	PolysDirectory::usage = "The directory in the HDF5 file for the polygon vertices."
@@ -30,6 +30,25 @@ PolygonColors::usage = "PolygonColors[file, opts] returns a list of {polys, poly
 	BEdgeForm::usage = "The EdgeForm of B states."
 	DisconColor::usage = "The color of the disconnected states."
 	AvoidColor::usage = "The color of the avoided states."
+
+
+ABLegend::usage = "ABLegend[opts] creates a legend suitable for TPT plots."
+	ABPlaced::usage = "Control the placement location of ABLegend."
+	ABLegendMag::usage = "Control the size of the text labels."
+	ABLegendMarkerSize::usage = "Control the size of the swatch boxes."
+			
+PolygonBarLegend::usage = "Add a bar legend for the data."
+
+PolygonSwatchLegend::usage = "Add a swatch legend for the data."
+	PolygonDataLegendSwatchOffset::usage = "The offset between text and markers."
+	PolygonDataLegendSwatchSpacings::usage = "The vertical spacing between the markers (unstable for negative values.)"
+	
+(*Options common to all data legends.*)	
+	PolygonDataLegendLabel::usage = "A TeX string for swatch legends or list of three TeX strings for bar legends."
+	PolygonDataLegendPlaced::usage = "The location of the legend."
+	PolygonDataLegendLabelMag::usage = "The size of the text of the legend label."
+	PolygonDataLegendMarkerSize::usage = "The size of the marker(s)."
+	PolygonDataLegendTickMag::usage = "The size of the legend ticks/labels."
 
 
 Begin["`Private`"]
@@ -90,7 +109,7 @@ ParseABInds[file_,opts:OptionsPattern[]]:=
 	]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*PolygonColors*)
 
 
@@ -161,6 +180,145 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 		{polycolor, polycolorDis}
 		]	
 	]	
+
+
+(* ::Subsection::Closed:: *)
+(*ABLegend*)
+
+
+ABLegendOpts={ABPlaced->{0.077,0.18}, ABLegendMag->1.8, ABLegendMarkerSize->12};
+Options[ABLegend]=Join[
+					ABLegendOpts,
+					FilterRules[Options[PolygonColors],{AColor,BColor,DisconColor,AvoidColor}]];
+
+ABLegend[opts:OptionsPattern[]]:=
+	With[{AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor], ABPlaced = OptionValue[ABPlaced], ABLegendMag = OptionValue[ABLegendMag], ABLegendMarkerSize = OptionValue[ABLegendMarkerSize]}, 
+	Module[{colors,labels,valid,legs},
+		colors={AColor,BColor,DisconColor,AvoidColor};
+		labels={MaTeX["\\mathbb{A}", Magnification->ABLegendMag],
+				MaTeX["\\mathbb{B}", Magnification->ABLegendMag],
+				MaTeX["\\text{Discon.}", Magnification->ABLegendMag],
+				MaTeX["\\text{Avoid}", Magnification->ABLegendMag]};
+		valid=Flatten[Position[colors, _?(ColorQ[#]&)]];
+		colors=colors[[valid]];
+		labels=labels[[valid]];
+		Placed[
+			SwatchLegend[
+				colors,
+				labels,
+				LegendMarkerSize->ABLegendMarkerSize,
+				LegendMarkers->Table[
+								Graphics[{Opacity[1],EdgeForm[Directive[Thin,Black]],Rectangle[]}],
+							{i,1,Length[colors]}]
+				],
+			ABPlaced
+			]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(*PolygonDataLegend*)
+
+
+PolygonDataLegendOpts={
+	PolygonDataLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
+	PolygonDataLegendPlaced->{0.9, 0.8}, 
+	PolygonDataLegendLabelMag->1.2, 
+	PolygonDataLegendMarkerSize->{10,100}, 
+	PolygonDataLegendTickMag->1};
+
+
+(* ::Subsection:: *)
+(*PolygonBarLegend*)
+
+
+Options[PolygonBarLegend]=Join[
+						PolygonDataLegendOpts,
+						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction,PolygonColorScaled}]
+						];
+
+PolygonBarLegend[file_,opts:OptionsPattern[]]:=
+	With[{
+	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
+	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
+	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
+	PolygonDataLegendMarkerSize=OptionValue[PolygonDataLegendMarkerSize],
+	PolygonDataLegendTickMag=OptionValue[PolygonDataLegendTickMag],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	ScalarParts=OptionValue[ScalarParts],
+	PolygonColorFunction=OptionValue[PolygonColorFunction],
+	PolygonColorScaled=OptionValue[PolygonColorScaled]}, 
+	Module[{scalar, maxScalar},
+		scalar=Extract[Import[file,ScalarDirectory],ScalarParts];
+		maxScalar=If[PolygonColorScaled,Max[scalar],1];
+		Placed[
+			BarLegend[
+				{PolygonColorFunction, {0.0, 1.0}}, 
+				LegendLabel -> MaTeX[
+					PolygonDataLegendLabel[[1]]<>
+					If[PolygonColorScaled,
+						"\\frac{"<>PolygonDataLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
+						PolygonDataLegendLabel[[2]]
+					]<>
+					PolygonDataLegendLabel[[3]], 
+				Magnification -> PolygonDataLegendLabelMag], 
+				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> Ceiling[14*PolygonDataLegendTickMag]], 
+				LegendMarkerSize -> PolygonDataLegendMarkerSize], 
+		PolygonDataLegendPlaced]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(*PolygonSwatchLegend*)
+
+
+PolygonSwatchLegendOpts={PolygonDataLegendSwatchOffset->0, PolygonDataLegendSwatchSpacings->0};
+
+Options[PolygonSwatchLegend]=Join[
+						PolygonSwatchLegendOpts,
+						PolygonDataLegendOpts,
+						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction}]
+						];
+
+PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
+	With[{
+	PolygonDataLegendSwatchOffset=OptionValue[PolygonDataLegendSwatchOffset],
+	PolygonDataLegendSwatchSpacings=OptionValue[PolygonDataLegendSwatchSpacings],
+	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
+	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
+	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
+	PolygonDataLegendMarkerSize=OptionValue[PolygonDataLegendMarkerSize],
+	PolygonDataLegendTickMag=OptionValue[PolygonDataLegendTickMag],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	ScalarParts=OptionValue[ScalarParts],
+	PolygonColorFunction=OptionValue[PolygonColorFunction]}, 
+	Module[{colors, labels, scalar, maxScalar},
+		scalar=DeleteDuplicates[Extract[Import[file,ScalarDirectory],ScalarParts]];
+		colors=Map[PolygonColorFunction, scalar];
+		labels=Table[
+				DisplayForm[AdjustmentBox[MaTeX[i, Magnification->PolygonDataLegendTickMag],BoxBaselineShift->PolygonDataLegendSwatchOffset]],
+			{i,scalar}];
+		Placed[
+			SwatchLegend[
+				colors,
+				labels,
+				LegendLabel->MaTeX[StringJoin[PolygonDataLegendLabel],Magnification->PolygonDataLegendLabelMag],
+				LegendMarkerSize->PolygonDataLegendMarkerSize,
+				LegendMarkers->Table[
+								Graphics[{Opacity[1],EdgeForm[Directive[Thin,Black]],Rectangle[]}],
+							{i,1,Length[colors]}],
+				Spacings->PolygonDataLegendSwatchSpacings
+				],
+			PolygonDataLegendPlaced
+			]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(*End Matter*)
 
 
 End[]
