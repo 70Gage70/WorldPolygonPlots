@@ -10,12 +10,17 @@
 
 SetDirectory[NotebookDirectory[]];
 
+(*
 <<MaTeX`
 <<EurekaColors`
 <<WLHelpers`
+<<GeoTick`
 <<WorldPolygons`
 <<PolygonColorsLegends`
 <<FancyGeoFrame`
+*)
+<<PolygonPlots`
+
 
 
 (* ::Subsection:: *)
@@ -174,6 +179,14 @@ PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
 		graphics
 	]
 ]
+
+
+PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	PlotGeoPolygonGeoProjection->"Albers",
+	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
+	AEdgeForm->Directive[Thick,Black],
+	BEdgeForm->Directive[Black],
+	PolygonColorEdgeForm->None]
 
 
 (* ::Subsection:: *)
