@@ -179,7 +179,7 @@ PlotPolygon[file_, opts:OptionsPattern[]] :=
 		{polyColor, polyColorDis} = PolygonColors[file, DelegateOptions[opts, PlotPolygon]];
 		world = WorldPolygon[DelegateOptions[opts, PlotPolygon]];
 		graphics = Graphics[
-					Join[polyColor, polyColorDis, world], 
+					Join[polyColorDis, polyColor, world], 
 					PlotRange -> PlotPolygonRange, 
 					Frame -> True, 
 					FrameTicks -> WorldTicks[DelegateOptions[opts, PlotPolygon]],
@@ -293,7 +293,7 @@ PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
 		{frame,newrange} = FancyGeoFrame[PlotGeoPolygonTicks[[1]],PlotGeoPolygonTicks[[2]], DelegateOptions[opts, PlotGeoPolygon]];
 		world = WorldGeoPolygon[DelegateOptions[opts, PlotPolygon]];
 		graphics = GeoGraphics[
-						Join[polyColor,polyColorDis,world,frame],
+						Join[polyColorDis, polyColor,world,frame],
 						GeoRange->Reverse[newrange],
 						GeoRangePadding->{None,None},
 						GeoBackground->PlotGeoPolygonGeoBackground,
@@ -312,12 +312,18 @@ PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
 ]
 
 
-Options[GeoProjection]
-
-
 PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	PlotGeoPolygonGeoProjection->"Albers",
-	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4]]
+	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
+	AEdgeForm->Directive[Thick,Black],
+	BEdgeForm->Directive[Black],
+	PolygonColorEdgeForm->None]
+
+
+Join[Delete[{1,2,3,2,5}, List /@ {2,4}], Part[{1,2,3,2,5}, {2,4}]]
+
+
+Complement[{1,2,3,4},{1,2}]
 
 
 (* ::Section:: *)

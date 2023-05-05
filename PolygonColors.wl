@@ -98,8 +98,11 @@ PolygonColorsOpts={
 	PolygonColorScaled->True, 
 	PolygonColorFunction->EurekaColorSmooth,
 	PolygonColorTransform->Function[#^(1/4)],
-	AColor->Hue[0.83,0.68,1.0], 
+	PolygonColorEdgeForm->Directive[Thin, LightGray],
+	AColor->Hue[0.83,0.68,1.0],
+	AEdgeForm->Directive[Thin, LightGray], 
 	BColor->Red, 
+	BEdgeForm->Directive[Thin, LightGray],
 	DisconColor->Black, 
 	AvoidColor->LightGray};
 	
@@ -117,12 +120,15 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 	PolygonColorScaled = OptionValue[PolygonColorScaled],
 	PolygonColorFunction = OptionValue[PolygonColorFunction],
 	PolygonColorTransform = OptionValue[PolygonColorTransform],
+	PolygonColorEdgeForm=OptionValue[PolygonColorEdgeForm],
 	AColor = OptionValue[AColor],
+	AEdgeForm = OptionValue[AEdgeForm],
 	BColor = OptionValue[BColor],
+	BEdgeForm = OptionValue[BEdgeForm],
 	DisconColor = OptionValue[DisconColor],
 	AvoidColor = OptionValue[AvoidColor],
 	PolyOrGeoPoly=OptionValue[PolyOrGeoPoly]}, 
-	Module[{polys, polysDis, GeoPolyOpacity, indsA, indsB, indsAvoid, scalar, maxScalar, polycolor, polycolorDis},
+	Module[{polys, polysDis, GeoPolyOpacity, indsA, indsB, indsAvoid, trueAB, scalar, maxScalar, polycolor, polycolorDis},
 		{polys, polysDis} = ParseHDF5Polygons[file, DelegateOptions[opts, PolygonColors]];
 		{indsA, indsB, indsAvoid}=ParseABInds[file, DelegateOptions[opts, PolygonColors]];
 		scalar=Extract[Import[file,ScalarDirectory],ScalarParts];
@@ -136,12 +142,14 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 			Table[
 				Which[
 					MemberQ[indsAvoid, i],{GeoPolyOpacity[1],FaceForm[AvoidColor], polys[[i]]},
-					MemberQ[indsA, i],{GeoPolyOpacity[1], FaceForm[AColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
-					MemberQ[indsB, i],{GeoPolyOpacity[1], FaceForm[BColor], EdgeForm[Directive[Thin, LightGray]], polys[[i]]},
-					True, {GeoPolyOpacity[PolygonOpacity], FaceForm[PolygonColorFunction[PolygonColorTransform[scalar[[i]]/maxScalar]]], EdgeForm[Directive[Thin, LightGray]], polys[[i]]}
+					MemberQ[indsA, i],{GeoPolyOpacity[1], FaceForm[AColor], EdgeForm[AEdgeForm], polys[[i]]},
+					MemberQ[indsB, i],{GeoPolyOpacity[1], FaceForm[BColor], EdgeForm[BEdgeForm], polys[[i]]},
+					True, {GeoPolyOpacity[PolygonOpacity], FaceForm[PolygonColorFunction[PolygonColorTransform[scalar[[i]]/maxScalar]]], EdgeForm[PolygonColorEdgeForm], polys[[i]]}
 					],
 			{i,1,Length[polys]}
 			];
+		trueAB=Complement[Union[indsA,indsB],indsAvoid];
+		polycolor=Join[Delete[polycolor, List /@ trueAB], Part[polycolor, trueAB]]; (*Put true A/B at the end so they take priority in graphics*)
 		polycolorDis=
 			Table[
 			{FaceForm[DisconColor], polysDis[[i]]},
