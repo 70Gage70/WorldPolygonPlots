@@ -23,8 +23,11 @@ PolygonColors::usage = "PolygonColors[file, opts] returns a list of {polys, poly
 	PolygonColorScaled::usage = "Whether to scale the value of the scalar by its maximum."
 	PolygonColorFunction::usage = "A map from real numbers to colors."
 	PolygonColorTransform::usage = "A function that the values of the scalar will be transformed by."
+	PolygonColorEdgeForm::usage = "The edge form of polygons other than true A and B."
 	AColor::usage = "The color of the A states."
+	AEdgeForm::usage = "The EdgeForm of A states."
 	BColor::usage = "The color of the B states."
+	BEdgeForm::usage = "The EdgeForm of B states."
 	DisconColor::usage = "The color of the disconnected states."
 	AvoidColor::usage = "The color of the avoided states."
 

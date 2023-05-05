@@ -201,7 +201,8 @@ PlotPolygon[file_, opts:OptionsPattern[]] :=
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	AColor->Yellow,
 	PlotPolygonABLegend->False,
-	PlotPolygonDataLegend->"Bar"
+	PlotPolygonDataLegend->"Bar",
+	AEdgeForm->Directive[Thick,Black]
 ]
 
 
@@ -231,7 +232,6 @@ Options[PlotPolygonSlices]=Join[
 					PlotPolygonSlicesOpts,
 					Options[PlotPolygon]
 					];
-(*Options[PlotPolygonSlices]=DeleteCases[Options[PlotPolygonSlices],ScalarParts->_];*)
 
 PlotPolygonSlices[file_, opts:OptionsPattern[]] :=
 	With[{
@@ -312,6 +312,37 @@ PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
 ]
 
 
+(* ::Subsection:: *)
+(*PlotGeoPolygonSlices*)
+
+
+PlotGeoPolygonSlicesOpts={EndFrame->-1, SlicesReverseRowCol->False};
+Options[PlotGeoPolygonSlices]=Join[
+					PlotGeoPolygonSlicesOpts,
+					Options[PlotGeoPolygon]
+					];
+
+PlotGeoPolygonSlices[file_, opts:OptionsPattern[]] :=
+	With[{
+	EndFrame=OptionValue[EndFrame],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	SlicesReverseRowCol=OptionValue[SlicesReverseRowCol],
+	SP=OptionValue[ScalarParts]}, 
+	Module[{length, frames = {}},
+		length=Length[
+				Extract[Import[file,ScalarDirectory], If[SlicesReverseRowCol,Reverse[SP],SP]]
+			];
+		Do[
+			AppendTo[frames, PlotGeoPolygon[file, ScalarParts->If[SlicesReverseRowCol,Reverse[{All,i}],{All,i}], DelegateOptions[opts, PlotPolygonSlices]]]
+		,{i,1,If[EndFrame==-1,length,EndFrame]}];
+		frames
+	]
+]
+
+
+Quit[]
+
+
 PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	PlotGeoPolygonGeoProjection->"Albers",
 	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
@@ -320,10 +351,22 @@ PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/s
 	PolygonColorEdgeForm->None]
 
 
-Join[Delete[{1,2,3,2,5}, List /@ {2,4}], Part[{1,2,3,2,5}, {2,4}]]
+PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	PlotGeoPolygonGeoProjection->"Equirectangular"]
 
 
-Complement[{1,2,3,4},{1,2}]
+PlotGeoPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
+	ScalarParts->{All,1},
+	EndFrame->4,
+	PlotGeoPolygonGeoProjection->"Albers",
+	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
+	AEdgeForm->Directive[Thick,Black],
+	BEdgeForm->Directive[Black],
+	PolygonColorEdgeForm->None]
+
+
+Options[PlotGeoPolygon]//MatrixForm
 
 
 (* ::Section:: *)
