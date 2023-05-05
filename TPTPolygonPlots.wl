@@ -80,7 +80,7 @@ ScalarLegendOpts={
 
 Options[ScalarLegend]=Join[
 						ScalarLegendOpts,
-						FilterRules[Options[PolygonColors],{ScalarDirectory,PolygonColorFunction,PolygonColorScaled}]
+						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction,PolygonColorScaled}]
 						];
 
 ScalarLegend[file_,opts:OptionsPattern[]]:=
@@ -91,10 +91,11 @@ ScalarLegend[file_,opts:OptionsPattern[]]:=
 	ScalarLegendMarkerSize=OptionValue[ScalarLegendMarkerSize],
 	ScalarLegendTickFontSize=OptionValue[ScalarLegendTickFontSize],
 	ScalarDirectory=OptionValue[ScalarDirectory],
+	ScalarParts=OptionValue[ScalarParts],
 	PolygonColorFunction=OptionValue[PolygonColorFunction],
 	PolygonColorScaled=OptionValue[PolygonColorScaled]}, 
 	Module[{scalar, maxScalar},
-		scalar=Import[file,ScalarDirectory];
+		scalar=Extract[Import[file,ScalarDirectory],ScalarParts];
 		maxScalar=If[PolygonColorScaled,Max[scalar],1];
 		Placed[
 			BarLegend[
@@ -171,27 +172,38 @@ Options[PlotScalar]//MatrixForm
 (*PlotScalarSlices*)
 
 
-PlotScalarSlicesOpts={EndFrame->-1, TransposeSlices->True};
+PlotScalarSlicesOpts={EndFrame->-1, SlicesReverseRowCol->False};
 Options[PlotScalarSlices]=Join[
 					PlotScalarSlicesOpts,
 					Options[PlotScalar]
 					];
+(*Options[PlotScalarSlices]=DeleteCases[Options[PlotScalarSlices],ScalarParts->_];*)
 
 PlotScalarSlices[file_, opts:OptionsPattern[]] :=
-	With[{EndFrame=OptionValue[EndFrame],ScalarDirectory=OptionValue[ScalarDirectory],TransposeSlices=OptionValue[TransposeSlices]}, 
-	Module[{scalar, slice, frames = {}},
+	With[{
+	EndFrame=OptionValue[EndFrame],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	SlicesReverseRowCol=OptionValue[SlicesReverseRowCol],
+	SP=OptionValue[ScalarParts]}, 
+	Module[{length, frames = {}},
+		length=Length[
+				Extract[Import[file,ScalarDirectory], If[SlicesReverseRowCol,Reverse[SP],SP]]
+			];
 		Do[
-			scalar=Import[file,ScalarDirectory];
-			slice=If[TransposeSlices,scalar[[All,i]],scalar[[i,All]]];
-			AppendTo[frames, PlotScalar[file, DelegateOptions[opts, PlotScalarSlices]]]
-		,{i,1,If[EndFrame==-1,Dimensions[scalar][[2]],EndFrame]}];
+			AppendTo[frames, PlotScalar[file, ScalarParts->If[SlicesReverseRowCol,Reverse[{All,i}],{All,i}], DelegateOptions[opts, PlotScalarSlices]]]
+		,{i,1,If[EndFrame==-1,length,EndFrame]}];
 		frames
 	]
 ]
 
 
+DelegateOptions[AColor->Yellow, BColor->Red, PlotScalar]
+
+
 PlotScalarSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
+	AColor->Yellow,
+	ScalarParts->{All,1},
 	EndFrame->4]
 
 

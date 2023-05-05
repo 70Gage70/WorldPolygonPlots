@@ -112,7 +112,7 @@ Options[PolygonColors]=Join[
 PolygonColors[file_, opts:OptionsPattern[]]:=
 	With[{
 	ScalarDirectory = OptionValue[ScalarDirectory],
-	ScalarParts->[[All]], 
+	ScalarParts = OptionValue[ScalarParts], 
 	PolygonOpacity = OptionValue[PolygonOpacity],
 	PolygonColorScaled = OptionValue[PolygonColorScaled],
 	PolygonColorFunction = OptionValue[PolygonColorFunction],
