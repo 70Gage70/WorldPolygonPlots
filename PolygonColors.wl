@@ -18,6 +18,7 @@ ParseABInds::usage = "ParseABInds[file, opts] creates a list of TPT indices of A
 	
 PolygonColors::usage = "PolygonColors[file, opts] returns a list of {polys, polysdis}."
 	ScalarDirectory::usage = "The directory in the HDF5 file for the scalar quantity used to color the polygons."
+	ScalarParts::usage = "Extract[scalar, ScalarParts] is applied to the scalar."
 	PolygonOpacity::usage = "The opacity of the polygons the polygons."
 	PolygonColorScaled::usage = "Whether to scale the value of the scalar by its maximum."
 	PolygonColorFunction::usage = "A map from real numbers to colors."
@@ -92,6 +93,7 @@ ParseABInds[file_,opts:OptionsPattern[]]:=
 
 PolygonColorsOpts={
 	ScalarDirectory->"tpt_stat/statistics/normalized_reactive_density",
+	ScalarParts->{All},
 	PolygonOpacity->0.8, 
 	PolygonColorScaled->True, 
 	PolygonColorFunction->EurekaColorSmooth,
@@ -109,7 +111,8 @@ Options[PolygonColors]=Join[
 
 PolygonColors[file_, opts:OptionsPattern[]]:=
 	With[{
-	ScalarDirectory = OptionValue[ScalarDirectory], 
+	ScalarDirectory = OptionValue[ScalarDirectory],
+	ScalarParts->[[All]], 
 	PolygonOpacity = OptionValue[PolygonOpacity],
 	PolygonColorScaled = OptionValue[PolygonColorScaled],
 	PolygonColorFunction = OptionValue[PolygonColorFunction],
@@ -122,7 +125,7 @@ PolygonColors[file_, opts:OptionsPattern[]]:=
 	Module[{polys, polysDis, GeoPolyOpacity, indsA, indsB, indsAvoid, scalar, maxScalar, polycolor, polycolorDis},
 		{polys, polysDis} = ParseHDF5Polygons[file, DelegateOptions[opts, PolygonColors]];
 		{indsA, indsB, indsAvoid}=ParseABInds[file, DelegateOptions[opts, PolygonColors]];
-		scalar=Import[file,ScalarDirectory];
+		scalar=Extract[Import[file,ScalarDirectory],ScalarParts];
 		If[Length[scalar]!=Length[polys],Print["Scalar and polys have different dimensions."]; Abort[]];
 		maxScalar=If[PolygonColorScaled,Max[scalar],1];
 		GeoPolyOpacity=Which[

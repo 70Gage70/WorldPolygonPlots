@@ -32,26 +32,17 @@ TPTScalars=
 	|>;
 
 
-ParseABInds["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
-
-
-Graphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5", AColor->Yellow,PolygonOpacity->0.9][[1]]]
-
-
-GeoGraphics[PolygonColors["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5", AColor->Yellow, PolygonOpacity->0.9, PolyOrGeoPoly->"GeoPolygon",PolygonColorTransform->Function[#^(1/8)]][[1]],GeoProjection->"Albers"]
-
-
 (* ::Subsection:: *)
 (*ABLegend*)
 
 
-ABLegendOpts={ABPlaced->{0.077,0.18}, ABLegendMag->1.8};
+ABLegendOpts={ABPlaced->{0.077,0.18}, ABLegendMag->1.8, ABLegendMarkerSize->12};
 Options[ABLegend]=Join[
 					ABLegendOpts,
 					FilterRules[Options[PolygonColors],{AColor,BColor,DisconColor,AvoidColor}]];
 
 ABLegend[opts:OptionsPattern[]]:=
-	With[{AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor], ABPlaced = OptionValue[ABPlaced], ABLegendMag = OptionValue[ABLegendMag]}, 
+	With[{AColor = OptionValue[AColor], BColor = OptionValue[BColor], DisconColor = OptionValue[DisconColor], AvoidColor = OptionValue[AvoidColor], ABPlaced = OptionValue[ABPlaced], ABLegendMag = OptionValue[ABLegendMag], ABLegendMarkerSize = OptionValue[ABLegendMarkerSize]}, 
 	Module[{colors,labels,valid,legs},
 		colors={AColor,BColor,DisconColor,AvoidColor};
 		labels={MaTeX["\\mathbb{A}", Magnification->ABLegendMag],
@@ -65,7 +56,7 @@ ABLegend[opts:OptionsPattern[]]:=
 			SwatchLegend[
 				colors,
 				labels,
-				LegendMarkerSize->12,
+				LegendMarkerSize->ABLegendMarkerSize,
 				LegendMarkers->Table[
 								Graphics[{Opacity[1],EdgeForm[Directive[Thin,Black]],Rectangle[]}],
 							{i,1,Length[colors]}]
@@ -80,35 +71,42 @@ ABLegend[opts:OptionsPattern[]]:=
 (*ScalarLegend*)
 
 
-ScalarLegendOpts={ScalarLegendLabel->"normalized_reactive_density", ScalarLegendPlaced->{0.9, 0.8}, ScalarLegendLabelMag->1.2, ScalarLegendMarkerSize->{10,100}, ScalarLegendTickFontSize->14};
+ScalarLegendOpts={
+	ScalarLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
+	ScalarLegendPlaced->{0.9, 0.8}, 
+	ScalarLegendLabelMag->1.2, 
+	ScalarLegendMarkerSize->{10,100}, 
+	ScalarLegendTickFontSize->14};
+
 Options[ScalarLegend]=Join[
 						ScalarLegendOpts,
-						FilterRules[PolygonColorsOpts,PolygonColorFunction],
-						FilterRules[PolygonColorsOpts,Scalar],
-						FilterRules[PolygonColorsOpts,PlotExponent]
+						FilterRules[Options[PolygonColors],{ScalarDirectory,PolygonColorFunction,PolygonColorScaled}]
 						];
 
-ScalarLegend[scalar_,opts:OptionsPattern[]]:=
-	With[
-	{ScalarLegendLabel=OptionValue[ScalarLegendLabel],ScalarLegendPlaced=OptionValue[ScalarLegendPlaced],ScalarLegendLabelMag=OptionValue[ScalarLegendLabelMag],
-	ScalarLegendMarkerSize=OptionValue[ScalarLegendMarkerSize],ScalarLegendTickFontSize=OptionValue[ScalarLegendTickFontSize],
-	PolygonColorFunction=OptionValue[PolygonColorFunction], PlotExponent= OptionValue[PlotExponent]}, 
-	Module[{maxScalar = Max[scalar]},
+ScalarLegend[file_,opts:OptionsPattern[]]:=
+	With[{
+	ScalarLegendLabel=OptionValue[ScalarLegendLabel],
+	ScalarLegendPlaced=OptionValue[ScalarLegendPlaced],
+	ScalarLegendLabelMag=OptionValue[ScalarLegendLabelMag],
+	ScalarLegendMarkerSize=OptionValue[ScalarLegendMarkerSize],
+	ScalarLegendTickFontSize=OptionValue[ScalarLegendTickFontSize],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	PolygonColorFunction=OptionValue[PolygonColorFunction],
+	PolygonColorScaled=OptionValue[PolygonColorScaled]}, 
+	Module[{scalar, maxScalar},
+		scalar=Import[file,ScalarDirectory];
+		maxScalar=If[PolygonColorScaled,Max[scalar],1];
 		Placed[
 			BarLegend[
 				{PolygonColorFunction, {0.0, 1.0}}, 
 				LegendLabel -> MaTeX[
-					"\\left(\\frac{" <> 
-					Which[
-						MemberQ[Keys[TPTScalars],ScalarLegendLabel], TPTScalars[ScalarLegendLabel],
-						MemberQ[Keys[UlamScalars],ScalarLegendLabel], UlamScalars[ScalarLegendLabel]
-					] <> 
-					"}{" <> 
-					NumberToTeXString[maxScalar] <> 
-					"}\\right)^{" <> 
-					FractionToInlineLaTeX[PlotExponent] <>
-					"}", 
-					Magnification -> ScalarLegendLabelMag], 
+					ScalarLegendLabel[[1]]<>
+					If[PolygonColorScaled,
+						"\\frac{"<>ScalarLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
+						ScalarLegendLabel[[2]]
+					]<>
+					ScalarLegendLabel[[3]], 
+				Magnification -> ScalarLegendLabelMag], 
 				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> ScalarLegendTickFontSize], 
 				LegendMarkerSize -> ScalarLegendMarkerSize], 
 		ScalarLegendPlaced]
@@ -120,59 +118,81 @@ ScalarLegend[scalar_,opts:OptionsPattern[]]:=
 (*PlotScalar*)
 
 
-PlotScalarOpts={WorldRange->{{-100,-59},{6,32}}, PlotScalarImageSize->800};
-Options[PlotScalar]=Join[
+PlotScalarOpts={PlotScalarRange->{{-100,15},{-9,39}}, PlotScalarImageSize->800};
+Options[PlotScalar]=DeleteDuplicates[Join[
 					PlotScalarOpts,
-					ScalarLegendOpts,
+					Options[ABLegend],
+					Options[ScalarLegend],
 					Options[PolygonColors],
 					Options[WorldTicks],
 					Options[WorldPolygon]
-					];
+					]];
 
-PlotScalar[fulam_, scalar_, opts:OptionsPattern[]] :=
-	With[{WorldRange=OptionValue[WorldRange], PlotExponent=OptionValue[PlotExponent], PlotScalarImageSize=OptionValue[PlotScalarImageSize]}, 
+PlotScalar[file_, opts:OptionsPattern[]] :=
+	With[{
+	PlotScalarRange=OptionValue[PlotScalarRange], 
+	PlotScalarImageSize=OptionValue[PlotScalarImageSize]}, 
 	Module[{polyColor, polyColorDis, world},
-		{polyColor, polyColorDis} = PolygonColors[fulam, scalar, InheritOpts[PlotScalar,PolygonColors,opts]];
-		world = WorldPolygon[InheritOpts[PlotScalar,WorldPolygon,opts]];
+		{polyColor, polyColorDis} = PolygonColors[file, DelegateOptions[opts, PlotScalar]];
+		world = WorldPolygon[DelegateOptions[opts, PlotScalar]];
 		Legended[
 			Legended[
 				Graphics[
 					Join[polyColor, polyColorDis, world], 
-					PlotRange -> WorldRange, 
+					PlotRange -> PlotScalarRange, 
 					Frame -> True, 
-					FrameTicks -> WorldTicks[InheritOpts[PlotScalar,WorldTicks,opts]],
+					FrameTicks -> WorldTicks[DelegateOptions[opts, PlotScalar]],
 					FrameTicksStyle-> Directive[Black, 20], 
 					PlotRangeClipping -> True, 
 					FrameLabel -> {{None, None}, {None, None}}, 
 					ImageSize -> PlotScalarImageSize], 
-			ABLegend[InheritOpts[PlotScalar,ABLegend,opts]]
+			ABLegend[DelegateOptions[opts, PlotScalar]]
 			], 
-		ScalarLegend[scalar, InheritOpts[PlotScalar,ScalarLegend,opts]]
+		ScalarLegend[file, DelegateOptions[opts, PlotScalar]]
 		]
 	]
 ]
+
+
+PlotScalar["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
+
+
+PlotScalar["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	ScalarDirectory->"parts_stat/spectral_P",
+	PolygonColorScaled->False,
+	PolygonColorTransform->Function[#],
+	PolygonColorFunction->Function[If[#==1,Red,Blue]]]
+
+
+Options[PlotScalar]//MatrixForm
 
 
 (* ::Subsection:: *)
 (*PlotScalarSlices*)
 
 
-PlotScalarSlicesOpts={EndFrame->-1};
+PlotScalarSlicesOpts={EndFrame->-1, TransposeSlices->True};
 Options[PlotScalarSlices]=Join[
 					PlotScalarSlicesOpts,
 					Options[PlotScalar]
 					];
 
-PlotScalarSlices[fulam_, scalar_, opts:OptionsPattern[]] :=
-	With[{EndFrame=OptionValue[EndFrame]}, 
-	Module[{slice, frames = {}},
+PlotScalarSlices[file_, opts:OptionsPattern[]] :=
+	With[{EndFrame=OptionValue[EndFrame],ScalarDirectory=OptionValue[ScalarDirectory],TransposeSlices=OptionValue[TransposeSlices]}, 
+	Module[{scalar, slice, frames = {}},
 		Do[
-			slice=scalar[[All,i]];
-			AppendTo[frames, PlotScalar[fulam, slice,InheritOpts[PlotScalarSlices,PlotScalar,opts]]]
+			scalar=Import[file,ScalarDirectory];
+			slice=If[TransposeSlices,scalar[[All,i]],scalar[[i,All]]];
+			AppendTo[frames, PlotScalar[file, DelegateOptions[opts, PlotScalarSlices]]]
 		,{i,1,If[EndFrame==-1,Dimensions[scalar][[2]],EndFrame]}];
 		frames
 	]
 ]
+
+
+PlotScalarSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
+	EndFrame->4]
 
 
 (* ::Section:: *)
