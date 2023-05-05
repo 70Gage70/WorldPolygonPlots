@@ -16,20 +16,7 @@ SetDirectory[NotebookDirectory[]];
 <<GeoTick`
 <<WorldPolygons`
 <<PolygonColors`
-
-
-UlamScalars=<|
-	"counts"->"\\text{counts}"
-	|>;
-
-TPTScalars=
-	<|
-	"normalized_reactive_density"->"\\mu^{AB}",
-	"density"->"P \\cdot i_0",
-	"pi_stationary"->"\\pi",
-	"remaining_time"->"t^{i \\mathbb{B}}",
-	"q_plus"->"q^{+}"
-	|>;
+<<FancyGeoFrame`
 
 
 (* ::Subsection:: *)
@@ -124,13 +111,18 @@ PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 (*PolygonSwatchLegend*)
 
 
+PolygonSwatchLegendOpts={PolygonDataLegendSwatchOffset->0, PolygonDataLegendSwatchSpacings->0};
+
 Options[PolygonSwatchLegend]=Join[
+						PolygonSwatchLegendOpts,
 						PolygonDataLegend,
 						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction}]
 						];
 
 PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
 	With[{
+	PolygonDataLegendSwatchOffset=OptionValue[PolygonDataLegendSwatchOffset],
+	PolygonDataLegendSwatchSpacings=OptionValue[PolygonDataLegendSwatchSpacings],
 	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
 	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
 	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
@@ -142,7 +134,9 @@ PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
 	Module[{colors, labels, scalar, maxScalar},
 		scalar=DeleteDuplicates[Extract[Import[file,ScalarDirectory],ScalarParts]];
 		colors=Map[PolygonColorFunction, scalar];
-		labels=Table[MaTeX[ToString[i], Magnification->PolygonDataLegendTickMag],{i,scalar}];
+		labels=Table[
+				DisplayForm[AdjustmentBox[MaTeX[i, Magnification->PolygonDataLegendTickMag],BoxBaselineShift->PolygonDataLegendSwatchOffset]],
+			{i,scalar}];
 		Placed[
 			SwatchLegend[
 				colors,
@@ -151,7 +145,8 @@ PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
 				LegendMarkerSize->PolygonDataLegendMarkerSize,
 				LegendMarkers->Table[
 								Graphics[{Opacity[1],EdgeForm[Directive[Thin,Black]],Rectangle[]}],
-							{i,1,Length[colors]}]
+							{i,1,Length[colors]}],
+				Spacings->PolygonDataLegendSwatchSpacings
 				],
 			PolygonDataLegendPlaced
 			]
@@ -168,6 +163,7 @@ Options[PlotPolygon]=DeleteDuplicates[Join[
 					PlotPolygonOpts,
 					Options[ABLegend],
 					Options[PolygonBarLegend],
+					Options[PolygonSwatchLegend],
 					Options[PolygonColors],
 					Options[WorldTicks],
 					Options[WorldPolygon]
@@ -213,10 +209,14 @@ PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/
 	ScalarDirectory->"parts_stat/spectral_P",
 	PolygonColorScaled->False,
 	PolygonColorTransform->Function[#],
-	PolygonColorFunction->Function[If[#==1,Red,Blue]],
+	PolygonColorFunction->Function[If[#==1,Pink,Blue]],
 	PlotPolygonDataLegend->"Swatch",
-	PolygonDataLegendMarkerSize->10,
-	PolygonDataLegendTickMag->2]
+	PolygonDataLegendLabelMag->2,
+	PolygonDataLegendPlaced->{0.9,0.7},
+	PolygonDataLegendMarkerSize->{20,20},
+	PolygonDataLegendTickMag->2,
+	PolygonDataLegendSwatchOffset->0.6,
+	PolygonDataLegendSwatchSpacings->0]
 
 
 Options[PlotPolygon]//MatrixForm
@@ -251,14 +251,73 @@ PlotPolygonSlices[file_, opts:OptionsPattern[]] :=
 ]
 
 
-DelegateOptions[AColor->Yellow, BColor->Red, PlotPolygon]
-
-
 PlotPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
 	AColor->Yellow,
 	ScalarParts->{All,1},
+	PolygonDataLegendPlaced->{0.5,0.5},
 	EndFrame->4]
+
+
+(* ::Subsection:: *)
+(*PlotGeoPolygon*)
+
+
+PlotGeoPolygonOpts={
+	PlotGeoPolygonTicks->{{-100,0, 15},{-9,0, 39}}, 
+	PlotGeoPolygonGeoProjection->"Equirectangular", 
+	PlotGeoPolygonGeoBackground->None, 
+	PlotGeoPolygonImageSize->800, 
+	PlotGeoPolygonABLegend->True, 
+	PlotGeoPolygonDataLegend->"Bar"};
+Options[PlotGeoPolygon]=DeleteDuplicates[Join[
+					PlotGeoPolygonOpts,
+					Options[ABLegend],
+					Options[PolygonBarLegend],
+					Options[PolygonSwatchLegend],
+					Options[PolygonColors],
+					Options[WorldPolygon],
+					Options[FancyGeoFrame]
+					]];
+
+PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
+	With[{
+	PlotGeoPolygonTicks=OptionValue[PlotGeoPolygonTicks],
+	PlotGeoPolygonGeoProjection=OptionValue[PlotGeoPolygonGeoProjection],
+	PlotGeoPolygonGeoBackground=OptionValue[PlotGeoPolygonGeoBackground],
+	PlotGeoPolygonImageSize=OptionValue[PlotGeoPolygonImageSize],
+	PlotGeoPolygonABLegend=OptionValue[PlotGeoPolygonABLegend],
+	PlotGeoPolygonDataLegend=OptionValue[PlotGeoPolygonDataLegend]}, 
+	Module[{frame,newrange,polyColor, polyColorDis, world, graphics},
+		{polyColor, polyColorDis} = PolygonColors[file, PolyOrGeoPoly->"GeoPolygon",DelegateOptions[opts, PlotGeoPolygon]];
+		{frame,newrange} = FancyGeoFrame[PlotGeoPolygonTicks[[1]],PlotGeoPolygonTicks[[2]], DelegateOptions[opts, PlotGeoPolygon]];
+		world = WorldGeoPolygon[DelegateOptions[opts, PlotPolygon]];
+		graphics = GeoGraphics[
+						Join[polyColor,polyColorDis,world,frame],
+						GeoRange->Reverse[newrange],
+						GeoRangePadding->{None,None},
+						GeoBackground->PlotGeoPolygonGeoBackground,
+						GeoGridLines->None,
+						GeoProjection->PlotGeoPolygonGeoProjection,
+						ImageSize->PlotGeoPolygonImageSize
+					];
+		If[PlotGeoPolygonABLegend, graphics = Legended[graphics, ABLegend[DelegateOptions[opts, PlotGeoPolygon]]]];
+		graphics = Which[
+			PlotGeoPolygonDataLegend===None, graphics,
+			PlotGeoPolygonDataLegend=="Bar", Legended[graphics,PolygonBarLegend[file, DelegateOptions[opts, PlotGeoPolygon]]],
+			PlotGeoPolygonDataLegend=="Swatch", Legended[graphics,PolygonSwatchLegend[file, DelegateOptions[opts, PlotGeoPolygon]]]
+			];
+		graphics
+	]
+]
+
+
+Options[GeoProjection]
+
+
+PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	PlotGeoPolygonGeoProjection->"Albers",
+	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4]]
 
 
 (* ::Section:: *)
