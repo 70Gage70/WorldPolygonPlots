@@ -68,28 +68,33 @@ ABLegend[opts:OptionsPattern[]]:=
 
 
 (* ::Subsection:: *)
+(*DataLegend*)
+
+
+PolygonDataLegend={
+	PolygonDataLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
+	PolygonDataLegendPlaced->{0.9, 0.8}, 
+	PolygonDataLegendLabelMag->1.2, 
+	PolygonDataLegendMarkerSize->{10,100}, 
+	PolygonDataLegendTickMag->1};
+
+
+(* ::Subsection:: *)
 (*PolygonBarLegend*)
 
 
-PolygonBarLegendOpts={
-	PolygonBarLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
-	PolygonBarLegendPlaced->{0.9, 0.8}, 
-	PolygonBarLegendLabelMag->1.2, 
-	PolygonBarLegendMarkerSize->{10,100}, 
-	PolygonBarLegendTickFontSize->14};
-
 Options[PolygonBarLegend]=Join[
-						PolygonBarLegendOpts,
+						PolygonDataLegend,
 						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction,PolygonColorScaled}]
 						];
 
 PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 	With[{
-	PolygonBarLegendLabel=OptionValue[PolygonBarLegendLabel],
-	PolygonBarLegendPlaced=OptionValue[PolygonBarLegendPlaced],
-	PolygonBarLegendLabelMag=OptionValue[PolygonBarLegendLabelMag],
-	PolygonBarLegendMarkerSize=OptionValue[PolygonBarLegendMarkerSize],
-	PolygonBarLegendTickFontSize=OptionValue[PolygonBarLegendTickFontSize],
+	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
+	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
+	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
+	PolygonDataLegendMarkerSize=OptionValue[PolygonDataLegendMarkerSize],
+	PolygonDataLegendTickMag=OptionValue[PolygonDataLegendTickMag],
 	ScalarDirectory=OptionValue[ScalarDirectory],
 	ScalarParts=OptionValue[ScalarParts],
 	PolygonColorFunction=OptionValue[PolygonColorFunction],
@@ -101,16 +106,55 @@ PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 			BarLegend[
 				{PolygonColorFunction, {0.0, 1.0}}, 
 				LegendLabel -> MaTeX[
-					PolygonBarLegendLabel[[1]]<>
+					PolygonDataLegendLabel[[1]]<>
 					If[PolygonColorScaled,
-						"\\frac{"<>PolygonBarLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
-						PolygonBarLegendLabel[[2]]
+						"\\frac{"<>PolygonDataLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
+						PolygonDataLegendLabel[[2]]
 					]<>
-					PolygonBarLegendLabel[[3]], 
-				Magnification -> PolygonBarLegendLabelMag], 
-				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> PolygonBarLegendTickFontSize], 
-				LegendMarkerSize -> PolygonBarLegendMarkerSize], 
-		PolygonBarLegendPlaced]
+					PolygonDataLegendLabel[[3]], 
+				Magnification -> PolygonDataLegendLabelMag], 
+				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> Ceiling[14*PolygonDataLegendTickMag]], 
+				LegendMarkerSize -> PolygonDataLegendMarkerSize], 
+		PolygonDataLegendPlaced]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(*PolygonSwatchLegend*)
+
+
+Options[PolygonSwatchLegend]=Join[
+						PolygonDataLegend,
+						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction}]
+						];
+
+PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
+	With[{
+	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
+	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
+	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
+	PolygonDataLegendMarkerSize=OptionValue[PolygonDataLegendMarkerSize],
+	PolygonDataLegendTickMag=OptionValue[PolygonDataLegendTickMag],
+	ScalarDirectory=OptionValue[ScalarDirectory],
+	ScalarParts=OptionValue[ScalarParts],
+	PolygonColorFunction=OptionValue[PolygonColorFunction]}, 
+	Module[{colors, labels, scalar, maxScalar},
+		scalar=DeleteDuplicates[Extract[Import[file,ScalarDirectory],ScalarParts]];
+		colors=Map[PolygonColorFunction, scalar];
+		labels=Table[MaTeX[ToString[i], Magnification->PolygonDataLegendTickMag],{i,scalar}];
+		Placed[
+			SwatchLegend[
+				colors,
+				labels,
+				LegendLabel->MaTeX[StringJoin[PolygonDataLegendLabel],Magnification->PolygonDataLegendLabelMag],
+				LegendMarkerSize->PolygonDataLegendMarkerSize,
+				LegendMarkers->Table[
+								Graphics[{Opacity[1],EdgeForm[Directive[Thin,Black]],Rectangle[]}],
+							{i,1,Length[colors]}]
+				],
+			PolygonDataLegendPlaced
+			]
 		]
 	]
 
@@ -119,7 +163,7 @@ PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 (*PlotPolygon*)
 
 
-PlotPolygonOpts={PlotPolygonRange->{{-100,15},{-9,39}}, PlotPolygonImageSize->800};
+PlotPolygonOpts={PlotPolygonRange->{{-100,15},{-9,39}}, PlotPolygonImageSize->800, PlotPolygonABLegend->True,PlotPolygonDataLegend->"Bar"};
 Options[PlotPolygon]=DeleteDuplicates[Join[
 					PlotPolygonOpts,
 					Options[ABLegend],
@@ -132,13 +176,13 @@ Options[PlotPolygon]=DeleteDuplicates[Join[
 PlotPolygon[file_, opts:OptionsPattern[]] :=
 	With[{
 	PlotPolygonRange=OptionValue[PlotPolygonRange], 
-	PlotPolygonImageSize=OptionValue[PlotPolygonImageSize]}, 
-	Module[{polyColor, polyColorDis, world},
+	PlotPolygonImageSize=OptionValue[PlotPolygonImageSize],
+	PlotPolygonABLegend=OptionValue[PlotPolygonABLegend],
+	PlotPolygonDataLegend=OptionValue[PlotPolygonDataLegend]}, 
+	Module[{polyColor, polyColorDis, world, graphics},
 		{polyColor, polyColorDis} = PolygonColors[file, DelegateOptions[opts, PlotPolygon]];
 		world = WorldPolygon[DelegateOptions[opts, PlotPolygon]];
-		Legended[
-			Legended[
-				Graphics[
+		graphics = Graphics[
 					Join[polyColor, polyColorDis, world], 
 					PlotRange -> PlotPolygonRange, 
 					Frame -> True, 
@@ -146,23 +190,33 @@ PlotPolygon[file_, opts:OptionsPattern[]] :=
 					FrameTicksStyle-> Directive[Black, 20], 
 					PlotRangeClipping -> True, 
 					FrameLabel -> {{None, None}, {None, None}}, 
-					ImageSize -> PlotPolygonImageSize], 
-			ABLegend[DelegateOptions[opts, PlotPolygon]]
-			], 
-		PolygonBarLegend[file, DelegateOptions[opts, PlotPolygon]]
-		]
+					ImageSize -> PlotPolygonImageSize];
+		If[PlotPolygonABLegend, graphics = Legended[graphics, ABLegend[DelegateOptions[opts, PlotPolygon]]]];
+		graphics = Which[
+			PlotPolygonDataLegend===None, graphics,
+			PlotPolygonDataLegend=="Bar", Legended[graphics,PolygonBarLegend[file, DelegateOptions[opts, PlotPolygon]]],
+			PlotPolygonDataLegend=="Swatch", Legended[graphics,PolygonSwatchLegend[file, DelegateOptions[opts, PlotPolygon]]]
+			];
+		graphics
 	]
 ]
 
 
-PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+	AColor->Yellow,
+	PlotPolygonABLegend->False,
+	PlotPolygonDataLegend->"Bar"
+]
 
 
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"parts_stat/spectral_P",
 	PolygonColorScaled->False,
 	PolygonColorTransform->Function[#],
-	PolygonColorFunction->Function[If[#==1,Red,Blue]]]
+	PolygonColorFunction->Function[If[#==1,Red,Blue]],
+	PlotPolygonDataLegend->"Swatch",
+	PolygonDataLegendMarkerSize->10,
+	PolygonDataLegendTickMag->2]
 
 
 Options[PlotPolygon]//MatrixForm
