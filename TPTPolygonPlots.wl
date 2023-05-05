@@ -68,28 +68,28 @@ ABLegend[opts:OptionsPattern[]]:=
 
 
 (* ::Subsection:: *)
-(*ScalarLegend*)
+(*PolygonBarLegend*)
 
 
-ScalarLegendOpts={
-	ScalarLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
-	ScalarLegendPlaced->{0.9, 0.8}, 
-	ScalarLegendLabelMag->1.2, 
-	ScalarLegendMarkerSize->{10,100}, 
-	ScalarLegendTickFontSize->14};
+PolygonBarLegendOpts={
+	PolygonBarLegendLabel->{"\\left(", "\\mu^{\\mathbb{A} \\mathbb{B}}", "\\right)^{1/4}"}, 
+	PolygonBarLegendPlaced->{0.9, 0.8}, 
+	PolygonBarLegendLabelMag->1.2, 
+	PolygonBarLegendMarkerSize->{10,100}, 
+	PolygonBarLegendTickFontSize->14};
 
-Options[ScalarLegend]=Join[
-						ScalarLegendOpts,
+Options[PolygonBarLegend]=Join[
+						PolygonBarLegendOpts,
 						FilterRules[Options[PolygonColors],{ScalarDirectory,ScalarParts,PolygonColorFunction,PolygonColorScaled}]
 						];
 
-ScalarLegend[file_,opts:OptionsPattern[]]:=
+PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 	With[{
-	ScalarLegendLabel=OptionValue[ScalarLegendLabel],
-	ScalarLegendPlaced=OptionValue[ScalarLegendPlaced],
-	ScalarLegendLabelMag=OptionValue[ScalarLegendLabelMag],
-	ScalarLegendMarkerSize=OptionValue[ScalarLegendMarkerSize],
-	ScalarLegendTickFontSize=OptionValue[ScalarLegendTickFontSize],
+	PolygonBarLegendLabel=OptionValue[PolygonBarLegendLabel],
+	PolygonBarLegendPlaced=OptionValue[PolygonBarLegendPlaced],
+	PolygonBarLegendLabelMag=OptionValue[PolygonBarLegendLabelMag],
+	PolygonBarLegendMarkerSize=OptionValue[PolygonBarLegendMarkerSize],
+	PolygonBarLegendTickFontSize=OptionValue[PolygonBarLegendTickFontSize],
 	ScalarDirectory=OptionValue[ScalarDirectory],
 	ScalarParts=OptionValue[ScalarParts],
 	PolygonColorFunction=OptionValue[PolygonColorFunction],
@@ -101,85 +101,85 @@ ScalarLegend[file_,opts:OptionsPattern[]]:=
 			BarLegend[
 				{PolygonColorFunction, {0.0, 1.0}}, 
 				LegendLabel -> MaTeX[
-					ScalarLegendLabel[[1]]<>
+					PolygonBarLegendLabel[[1]]<>
 					If[PolygonColorScaled,
-						"\\frac{"<>ScalarLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
-						ScalarLegendLabel[[2]]
+						"\\frac{"<>PolygonBarLegendLabel[[2]]<>"}{"<>NumberToTeXString[maxScalar]<>"}",
+						PolygonBarLegendLabel[[2]]
 					]<>
-					ScalarLegendLabel[[3]], 
-				Magnification -> ScalarLegendLabelMag], 
-				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> ScalarLegendTickFontSize], 
-				LegendMarkerSize -> ScalarLegendMarkerSize], 
-		ScalarLegendPlaced]
+					PolygonBarLegendLabel[[3]], 
+				Magnification -> PolygonBarLegendLabelMag], 
+				LabelStyle -> Directive[Black, FontFamily -> "Latin Modern Roman", FontSize -> PolygonBarLegendTickFontSize], 
+				LegendMarkerSize -> PolygonBarLegendMarkerSize], 
+		PolygonBarLegendPlaced]
 		]
 	]
 
 
 (* ::Subsection:: *)
-(*PlotScalar*)
+(*PlotPolygon*)
 
 
-PlotScalarOpts={PlotScalarRange->{{-100,15},{-9,39}}, PlotScalarImageSize->800};
-Options[PlotScalar]=DeleteDuplicates[Join[
-					PlotScalarOpts,
+PlotPolygonOpts={PlotPolygonRange->{{-100,15},{-9,39}}, PlotPolygonImageSize->800};
+Options[PlotPolygon]=DeleteDuplicates[Join[
+					PlotPolygonOpts,
 					Options[ABLegend],
-					Options[ScalarLegend],
+					Options[PolygonBarLegend],
 					Options[PolygonColors],
 					Options[WorldTicks],
 					Options[WorldPolygon]
 					]];
 
-PlotScalar[file_, opts:OptionsPattern[]] :=
+PlotPolygon[file_, opts:OptionsPattern[]] :=
 	With[{
-	PlotScalarRange=OptionValue[PlotScalarRange], 
-	PlotScalarImageSize=OptionValue[PlotScalarImageSize]}, 
+	PlotPolygonRange=OptionValue[PlotPolygonRange], 
+	PlotPolygonImageSize=OptionValue[PlotPolygonImageSize]}, 
 	Module[{polyColor, polyColorDis, world},
-		{polyColor, polyColorDis} = PolygonColors[file, DelegateOptions[opts, PlotScalar]];
-		world = WorldPolygon[DelegateOptions[opts, PlotScalar]];
+		{polyColor, polyColorDis} = PolygonColors[file, DelegateOptions[opts, PlotPolygon]];
+		world = WorldPolygon[DelegateOptions[opts, PlotPolygon]];
 		Legended[
 			Legended[
 				Graphics[
 					Join[polyColor, polyColorDis, world], 
-					PlotRange -> PlotScalarRange, 
+					PlotRange -> PlotPolygonRange, 
 					Frame -> True, 
-					FrameTicks -> WorldTicks[DelegateOptions[opts, PlotScalar]],
+					FrameTicks -> WorldTicks[DelegateOptions[opts, PlotPolygon]],
 					FrameTicksStyle-> Directive[Black, 20], 
 					PlotRangeClipping -> True, 
 					FrameLabel -> {{None, None}, {None, None}}, 
-					ImageSize -> PlotScalarImageSize], 
-			ABLegend[DelegateOptions[opts, PlotScalar]]
+					ImageSize -> PlotPolygonImageSize], 
+			ABLegend[DelegateOptions[opts, PlotPolygon]]
 			], 
-		ScalarLegend[file, DelegateOptions[opts, PlotScalar]]
+		PolygonBarLegend[file, DelegateOptions[opts, PlotPolygon]]
 		]
 	]
 ]
 
 
-PlotScalar["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5"]
 
 
-PlotScalar["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"parts_stat/spectral_P",
 	PolygonColorScaled->False,
 	PolygonColorTransform->Function[#],
 	PolygonColorFunction->Function[If[#==1,Red,Blue]]]
 
 
-Options[PlotScalar]//MatrixForm
+Options[PlotPolygon]//MatrixForm
 
 
 (* ::Subsection:: *)
-(*PlotScalarSlices*)
+(*PlotPolygonSlices*)
 
 
-PlotScalarSlicesOpts={EndFrame->-1, SlicesReverseRowCol->False};
-Options[PlotScalarSlices]=Join[
-					PlotScalarSlicesOpts,
-					Options[PlotScalar]
+PlotPolygonSlicesOpts={EndFrame->-1, SlicesReverseRowCol->False};
+Options[PlotPolygonSlices]=Join[
+					PlotPolygonSlicesOpts,
+					Options[PlotPolygon]
 					];
-(*Options[PlotScalarSlices]=DeleteCases[Options[PlotScalarSlices],ScalarParts->_];*)
+(*Options[PlotPolygonSlices]=DeleteCases[Options[PlotPolygonSlices],ScalarParts->_];*)
 
-PlotScalarSlices[file_, opts:OptionsPattern[]] :=
+PlotPolygonSlices[file_, opts:OptionsPattern[]] :=
 	With[{
 	EndFrame=OptionValue[EndFrame],
 	ScalarDirectory=OptionValue[ScalarDirectory],
@@ -190,17 +190,17 @@ PlotScalarSlices[file_, opts:OptionsPattern[]] :=
 				Extract[Import[file,ScalarDirectory], If[SlicesReverseRowCol,Reverse[SP],SP]]
 			];
 		Do[
-			AppendTo[frames, PlotScalar[file, ScalarParts->If[SlicesReverseRowCol,Reverse[{All,i}],{All,i}], DelegateOptions[opts, PlotScalarSlices]]]
+			AppendTo[frames, PlotPolygon[file, ScalarParts->If[SlicesReverseRowCol,Reverse[{All,i}],{All,i}], DelegateOptions[opts, PlotPolygonSlices]]]
 		,{i,1,If[EndFrame==-1,length,EndFrame]}];
 		frames
 	]
 ]
 
 
-DelegateOptions[AColor->Yellow, BColor->Red, PlotScalar]
+DelegateOptions[AColor->Yellow, BColor->Red, PlotPolygon]
 
 
-PlotScalarSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+PlotPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
 	AColor->Yellow,
 	ScalarParts->{All,1},
@@ -211,7 +211,7 @@ PlotScalarSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl
 (*Calculations*)
 
 
-Options[PlotScalar]//Sort//MatrixForm
+Options[PlotPolygon]//Sort//MatrixForm
 
 
 ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
@@ -220,13 +220,13 @@ scalarpi=Import[ftpt,"/tpt_homog/statistics/pi_stationary"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
 
 Graphics[ParseHDF5Polygons[fulam]]
-s=PlotScalar[fulam, scalarmu,
+s=PlotPolygon[fulam, scalarmu,
 	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
-	ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	PolygonBarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, PolygonBarLegendPlaced->{0.9,0.6}, 
 	ABPlaced->{0.077,0.22}, AvoidColor->LightGray]
-s=PlotScalar[fulam, scalarpi,
+s=PlotPolygon[fulam, scalarpi,
 	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
-	ScalarLegendLabel->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	PolygonBarLegendLabel->"pi_stationary", PlotExponent->1/8, PolygonBarLegendPlaced->{0.9,0.6}, 
 	ABPlaced->{0.077,0.22}]
 
 
@@ -239,13 +239,13 @@ scalarpi=Import[ftpt,"/tpt_homog/statistics/pi_stationary"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
 
 Graphics[ParseHDF5Polygons[fulam]]
-s=PlotScalar[fulam, scalarmu,
+s=PlotPolygon[fulam, scalarmu,
 	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
-	ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	PolygonBarLegendLabel->"normalized_reactive_density", PlotExponent->1/8, PolygonBarLegendPlaced->{0.9,0.6}, 
 	ABPlaced->{0.077,0.22}, AvoidColor->LightGray]
-s=PlotScalar[fulam, scalarpi,
+s=PlotPolygon[fulam, scalarpi,
 	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
-	ScalarLegendLabel->"pi_stationary", PlotExponent->1/8, ScalarLegendPlaced->{0.9,0.6}, 
+	PolygonBarLegendLabel->"pi_stationary", PlotExponent->1/8, PolygonBarLegendPlaced->{0.9,0.6}, 
 	ABPlaced->{0.077,0.22}]
 
 
@@ -255,9 +255,9 @@ Export["/Users/gagebonner/Desktop/mu-stat.png",s]
 ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_nonstat_test.h5";
 scalarMU=Import[ftpt,"/tpt_homog/statistics/normalized_reactive_density"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
-framesMU=PlotScalarSlices[fulam, scalarMU, 
+framesMU=PlotPolygonSlices[fulam, scalarMU, 
 	EndFrame->-1,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"normalized_reactive_density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, PolygonBarLegendLabel->"normalized_reactive_density", PlotExponent->1/6, PolygonBarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
 ListAnimate[framesMU,AnimationRunning->False]
 
 
@@ -268,9 +268,9 @@ Export["/Users/gagebonner/Desktop/mu-nonstat.gif",framesMU]
 ftpt="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/TPT_nonstat_test.h5";
 scalarDEN=Import[ftpt,"/tpt_homog/statistics/density"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulam_test.h5";
-framesDEN=PlotScalarSlices[fulam, scalarDEN, 
+framesDEN=PlotPolygonSlices[fulam, scalarDEN, 
 	EndFrame->-1,
-	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, ScalarLegendLabel->"density", PlotExponent->1/6, ScalarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
+	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, PolygonBarLegendLabel->"density", PlotExponent->1/6, PolygonBarLegendPlaced->{0.9,0.6}, ABPlaced->{0.077,0.22}, AvoidColor->None];
 ListAnimate[framesDEN,AnimationRunning->False]
 
 
@@ -400,14 +400,14 @@ scalarcounts=Import[ftpt,"/ulam/counts"];
 fulam="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPT.h5";
 
 Graphics[ParseHDF5Polygons[fulam]]
-s=PlotScalar[fulam, scalarcounts,
+s=PlotPolygon[fulam, scalarcounts,
 	WorldRange->{{-100,15},{-9,39}},WorldTicksX->{-100, 0, 15}, WorldTicksY->{-9,0,39}, 
-	ScalarLegendLabel->"counts", PlotExponent->1/2, ScalarLegendPlaced->{0.9,0.6}, ScalarLegendLabelMag->1.2, 
+	PolygonBarLegendLabel->"counts", PlotExponent->1/2, PolygonBarLegendPlaced->{0.9,0.6}, PolygonBarLegendLabelMag->1.2, 
 	ABPlaced->{0.077,0.18}, ABLegendMag->1.8,
 	AvoidColor->None]
 
 
-Options[PlotScalar]//MatrixForm
+Options[PlotPolygon]//MatrixForm
 
 
 Export["/Users/gagebonner/Desktop/Rem Time Paper/new fgs/pdfs/tABboxT_vor.pdf",utVORcrop,Background->None];
