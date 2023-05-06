@@ -10,7 +10,7 @@ ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of poly
 	PolysDirectory::usage = "The directory in the HDF5 file for the polygon vertices."
 	NPolysDisDirectory::usage = "The directory in the HDF5 file for the number of disconnected polygons."
 	PolysDisDirectory::usage = "The directory in the HDF5 file for the disconnected polygon vertices."
-	PolyOrGeoPoly::usage = "Whether to parse the vertices as Polygon or GeoPolygon."
+	PolyOrGeoPoly::usage = "Whether to parse the vertices as Polygon (\"Polygon\") or GeoPolygon (\"GeoPolygon\")."
 
 ParseABInds::usage = "ParseABInds[file, opts] creates a list of TPT indices of A, B and the avoided region from the input file."
 	IndsADirectory::usage = "The directory in the HDF5 file for the A indices."
@@ -42,6 +42,7 @@ PolygonBarLegend::usage = "Add a bar legend for the data."
 PolygonSwatchLegend::usage = "Add a swatch legend for the data."
 	PolygonDataLegendSwatchOffset::usage = "The offset between text and markers."
 	PolygonDataLegendSwatchSpacings::usage = "The vertical spacing between the markers (unstable for negative values.)"
+	PolygonDataLegendSwatchZeroQ::usage = "Boolean, allow 0 to be among the labels if True."
 	
 (*Options common to all data legends.*)	
 	PolygonDataLegendLabel::usage = "A TeX string for swatch legends or list of three TeX strings for bar legends."
@@ -274,7 +275,7 @@ PolygonBarLegend[file_,opts:OptionsPattern[]]:=
 (*PolygonSwatchLegend*)
 
 
-PolygonSwatchLegendOpts={PolygonDataLegendSwatchOffset->0, PolygonDataLegendSwatchSpacings->0};
+PolygonSwatchLegendOpts={PolygonDataLegendSwatchOffset->0, PolygonDataLegendSwatchSpacings->0, PolygonDataLegendSwatchZeroQ->False};
 
 Options[PolygonSwatchLegend]=Join[
 						PolygonSwatchLegendOpts,
@@ -286,6 +287,7 @@ PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
 	With[{
 	PolygonDataLegendSwatchOffset=OptionValue[PolygonDataLegendSwatchOffset],
 	PolygonDataLegendSwatchSpacings=OptionValue[PolygonDataLegendSwatchSpacings],
+	PolygonDataLegendSwatchZeroQ=OptionValue[PolygonDataLegendSwatchZeroQ],
 	PolygonDataLegendLabel=OptionValue[PolygonDataLegendLabel],
 	PolygonDataLegendPlaced=OptionValue[PolygonDataLegendPlaced],
 	PolygonDataLegendLabelMag=OptionValue[PolygonDataLegendLabelMag],
@@ -296,6 +298,7 @@ PolygonSwatchLegend[file_,opts:OptionsPattern[]]:=
 	PolygonColorFunction=OptionValue[PolygonColorFunction]}, 
 	Module[{colors, labels, scalar, maxScalar},
 		scalar=DeleteDuplicates[Extract[Import[file,ScalarDirectory],ScalarParts]];
+		If[!PolygonDataLegendSwatchZeroQ,scalar=DeleteCases[scalar,0]];
 		colors=Map[PolygonColorFunction, scalar];
 		labels=Table[
 				DisplayForm[AdjustmentBox[MaTeX[i, Magnification->PolygonDataLegendTickMag],BoxBaselineShift->PolygonDataLegendSwatchOffset]],

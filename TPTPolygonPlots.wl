@@ -10,43 +10,66 @@
 
 SetDirectory[NotebookDirectory[]];
 
-(*
-<<MaTeX`
-<<EurekaColors`
-<<WLHelpers`
-<<GeoTick`
-<<WorldPolygons`
-<<PolygonColorsLegends`
-<<FancyGeoFrame`
-*)
-(*<<PolygonPlots`*)
-Needs["PolygonPlots`"]
+<<PolygonPlots`
+
+
+Options[PlotPolygon]//MatrixForm
 
 
 (* ::Subsection:: *)
-(*PlotPolygon*)
+(*Templates*)
 
 
-PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	AColor->Yellow,
-	PlotPolygonABLegend->False,
-	PlotPolygonDataLegend->"Bar",
-	AEdgeForm->Directive[Thick,Black]
-]
+allopts=Options[PlotPolygon];
 
 
-PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
+myopts={
+	WorldTicksX->{-100, 0, 15},
+	WorldTicksY->{-9,0,39},
+	AvoidColor->None,
+	PolygonDataLegendPlaced->{0.9, 0.65},
+	PolygonDataLegendLabelMag->1.4,
+	PolygonDataLegendMarkerSize->{15,150},
+	PlotPolygonImageSize->1000};
+	
+NorthAmericaGDPTPT=ReplaceRules[allopts, myopts];
+
+
+myopts={
+	WorldTicksX->{-100, 0, 15},
+	WorldTicksY->{-9,0,39},
 	ScalarDirectory->"parts_stat/spectral_P",
 	PolygonColorScaled->False,
 	PolygonColorTransform->Function[#],
-	PolygonColorFunction->Function[If[#==1,Pink,Blue]],
+	PolygonColorFunction->Function[If[#==1,Hue[0.5,0.5,0.5],Blue]],
+	PolygonColorEdgeForm->None,
+	AEdgeForm->None,
+	BEdgeForm->None,
+	PolygonDataLegendLabel->"\\text{parts.}",
 	PlotPolygonDataLegend->"Swatch",
 	PolygonDataLegendLabelMag->2,
 	PolygonDataLegendPlaced->{0.9,0.7},
 	PolygonDataLegendMarkerSize->{20,20},
 	PolygonDataLegendTickMag->2,
 	PolygonDataLegendSwatchOffset->0.6,
-	PolygonDataLegendSwatchSpacings->0]
+	PolygonDataLegendSwatchSpacings->0,
+	AvoidColor->None,
+	PlotPolygonImageSize->1000};
+	
+NorthAmericaGDPPartitions=ReplaceRules[allopts, myopts];
+
+
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",NorthAmericaGDPTPT]
+
+
+fij=Import["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5","tpt_stat/statistics/forward_current"];MatrixPlot[fij]
+Pplus=Import["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5","tpt_stat/statistics/forward_current"];MatrixPlot[fij]
+
+
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/spectral_P",NorthAmericaGDPPartitions]
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/spectral_f",NorthAmericaGDPPartitions]
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/hitting_location",NorthAmericaGDPPartitions]
+PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_nonstat/spectral_P_plus",NorthAmericaGDPPartitions]
 
 
 (* ::Subsection:: *)
@@ -55,10 +78,14 @@ PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/
 
 PlotPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
-	AColor->Yellow,
-	ScalarParts->{All,1},
-	PolygonDataLegendPlaced->{0.5,0.5},
-	EndFrame->4]
+	EndFrame->4,
+	WorldTicksX->{-100, 0, 15},
+	WorldTicksY->{-9,0,39},
+	AvoidColor->None,
+	PolygonDataLegendPlaced->{0.9, 0.65},
+	PolygonDataLegendLabelMag->1.4,
+	PolygonDataLegendMarkerSize->{15,150},
+	PlotPolygonImageSize->1000]
 
 
 (* ::Subsection:: *)

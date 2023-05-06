@@ -12,13 +12,15 @@ Option specification speci can be explicit opt -> val rule or delayed rule, a sy
 NumberToTeXString::usage = 
 "NumberToTeXString[num, prec] returns a string in LaTeX form suitable for use with MaTeX.
 
-num is the number
-prec is the number of digits of precision you want in the number (default 3)
+num::number
+prec::digits of precision in the number (default 3)
 "
 							
 FractionToInlineLaTeX::usage = 
 "FractionToLaTeX[num] converts a/b to a flat fraction (i.e. not \\frac) suitable for use with MaTeX.
 "
+
+ReplaceRules::usage = "ReplaceRules[replaced, replaceWith] overwrites the rules in replaced with replaceWith and returns the result."
 
 
 Begin["`Private`"]
@@ -31,7 +33,7 @@ Begin["`Private`"]
 (*None*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*InheritOpts*)
 
 
@@ -95,6 +97,13 @@ DelegateOptions /: head_[args1___, DelegateOptions[opts___], args2___] :=
         ],
         args2
     ]
+
+
+(* ::Subsection:: *)
+(*ReplaceRules*)
+
+
+ReplaceRules[replaced_,replaceWith_]:=Join[Select[replaced,!MemberQ[Keys[replaceWith],Keys[#]]&],replaceWith]
 
 
 End[]
