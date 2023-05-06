@@ -6,11 +6,30 @@
 
 BeginPackage["PolygonPlots`"]
 
-ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of polygons and disconnected polygons from the vertices in the input file."
-	PolysDirectory::usage = "The directory in the HDF5 file for the polygon vertices."
-	NPolysDisDirectory::usage = "The directory in the HDF5 file for the number of disconnected polygons."
-	PolysDisDirectory::usage = "The directory in the HDF5 file for the disconnected polygon vertices."
-	PolyOrGeoPoly::usage = "Whether to parse the vertices as Polygon or GeoPolygon."
+PlotPolygon::usage = "PlotPolygon[file,opts] plots Polygons using Graphics."
+	PlotPolygonRange::usage = "{{xmin,xmax},{ymin,ymax}}"
+	PlotPolygonImageSize::usage = "The image size of the Graphics object."
+	PlotPolygonABLegend::usage = "Boolean, whether to show the ABLegend."
+	PlotPolygonDataLegend::usage = "If None, show no DataLegend. If \"Bar\", use a bar legend. If \"Swatch\" use a swatch legend. "
+	
+PlotPolygonSlices::usage = "PlotPolygonSlices[file, opts] plots frames of an array as Polygons using Graphics."
+	EndFrame::usage = "If -1, plot every frame of the array, otherwise plot up to and including the value of EndFrame."
+	SlicesReverseRowCol::usage = "Boolean, whether to transpose the array. Used to take slices along rows vs. columns."
+	
+PlotGeoPolygon::usage = "PlotGeoPolygon[file,opts] plots GeoPolygons using GeoGraphics."
+	PlotGeoPolygonTicks::usage = "{xTicks,yTicks}. The range of the plot is controlled by the min/max values of the ticks."
+	PlotGeoPolygonGeoProjection::usage = "The GeoProjection used by GeoGraphics."
+	PlotGeoPolygonGeoBackground::usage = "The GeoBackground used by GeoGraphics."
+	PlotGeoPolygonImageSize::usage = "The image size of the Graphics object."
+	PlotGeoPolygonABLegend::usage = "Boolean, whether to show the ABLegend."
+	PlotGeoPolygonDataLegend::usage = "If None, show no DataLegend. If \"Bar\", use a bar legend. If \"Swatch\" use a swatch legend. "
+	
+PlotGeoPolygonSlices::usage = "PlotGeoPolygonSlices[file, opts] plots frames of an array as GeoPolygons using GeoGraphics."
+	EndFrame::usage = "If -1, plot every frame of the array, otherwise plot up to and including the value of EndFrame."
+	SlicesReverseRowCol::usage = "Boolean, whether to transpose the array. Used to take slices along rows vs. columns."
+
+
+Begin["`Private`"]
 
 
 (* ::Subsection:: *)
@@ -26,7 +45,7 @@ ParseHDF5Polygons::usage = "ParseHDF5Polygons[file, opts] creates a list of poly
 <<FancyGeoFrame`
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*PlotPolygon*)
 
 
@@ -70,32 +89,7 @@ PlotPolygon[file_, opts:OptionsPattern[]] :=
 ]
 
 
-PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	AColor->Yellow,
-	PlotPolygonABLegend->False,
-	PlotPolygonDataLegend->"Bar",
-	AEdgeForm->Directive[Thick,Black]
-]
-
-
-PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	ScalarDirectory->"parts_stat/spectral_P",
-	PolygonColorScaled->False,
-	PolygonColorTransform->Function[#],
-	PolygonColorFunction->Function[If[#==1,Pink,Blue]],
-	PlotPolygonDataLegend->"Swatch",
-	PolygonDataLegendLabelMag->2,
-	PolygonDataLegendPlaced->{0.9,0.7},
-	PolygonDataLegendMarkerSize->{20,20},
-	PolygonDataLegendTickMag->2,
-	PolygonDataLegendSwatchOffset->0.6,
-	PolygonDataLegendSwatchSpacings->0]
-
-
-Options[PlotPolygon]//MatrixForm
-
-
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*PlotPolygonSlices*)
 
 
@@ -123,15 +117,7 @@ PlotPolygonSlices[file_, opts:OptionsPattern[]] :=
 ]
 
 
-PlotPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
-	AColor->Yellow,
-	ScalarParts->{All,1},
-	PolygonDataLegendPlaced->{0.5,0.5},
-	EndFrame->4]
-
-
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*PlotGeoPolygon*)
 
 
@@ -184,15 +170,7 @@ PlotGeoPolygon[file_, opts:OptionsPattern[]] :=
 ]
 
 
-PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	PlotGeoPolygonGeoProjection->"Albers",
-	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
-	AEdgeForm->Directive[Thick,Black],
-	BEdgeForm->Directive[Black],
-	PolygonColorEdgeForm->None]
-
-
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*PlotGeoPolygonSlices*)
 
 
@@ -220,30 +198,16 @@ PlotGeoPolygonSlices[file_, opts:OptionsPattern[]] :=
 ]
 
 
-Quit[]
+(* ::Subsection:: *)
+(*End Matter*)
 
 
-PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	PlotGeoPolygonGeoProjection->"Albers",
-	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
-	AEdgeForm->Directive[Thick,Black],
-	BEdgeForm->Directive[Black],
-	PolygonColorEdgeForm->None]
+End[]
 
 
-PlotGeoPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	PlotGeoPolygonGeoProjection->"Equirectangular"]
+EndPackage[]
 
 
-PlotGeoPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
-	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
-	ScalarParts->{All,1},
-	EndFrame->4,
-	PlotGeoPolygonGeoProjection->"Albers",
-	PlotGeoPolygonGeoBackground->GeoStyling["ContourMap",Contours->4],
-	AEdgeForm->Directive[Thick,Black],
-	BEdgeForm->Directive[Black],
-	PolygonColorEdgeForm->None]
-
-
-Options[PlotGeoPolygon]//MatrixForm
+(*This ensures that all the symbols defined in the dependencies get exported.*)
+BeginPackage["PolygonPlots`",{"MaTeX`","EurekaColors`","WLHelpers`","GeoTick`","WorldPolygons`","PolygonColorsLegends`","FancyGeoFrame`"}]
+EndPackage[]
