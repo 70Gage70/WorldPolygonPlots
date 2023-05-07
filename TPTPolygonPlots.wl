@@ -62,10 +62,6 @@ NorthAmericaGDPPartitions=ReplaceRules[allopts, myopts];
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",NorthAmericaGDPTPT]
 
 
-fij=Import["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5","tpt_stat/statistics/forward_current"];MatrixPlot[fij]
-Pplus=Import["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5","tpt_stat/statistics/forward_current"];MatrixPlot[fij]
-
-
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/spectral_P",NorthAmericaGDPPartitions]
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/spectral_f",NorthAmericaGDPPartitions]
 PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",ScalarDirectory->"parts_stat/hitting_location",NorthAmericaGDPPartitions]
@@ -79,13 +75,7 @@ PlotPolygon["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/
 PlotPolygonSlices["/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5",
 	ScalarDirectory->"tpt_nonstat/statistics/normalized_reactive_density",
 	EndFrame->4,
-	WorldTicksX->{-100, 0, 15},
-	WorldTicksY->{-9,0,39},
-	AvoidColor->None,
-	PolygonDataLegendPlaced->{0.9, 0.65},
-	PolygonDataLegendLabelMag->1.4,
-	PolygonDataLegendMarkerSize->{15,150},
-	PlotPolygonImageSize->1000]
+	NorthAmericaGDPTPT]
 
 
 (* ::Subsection:: *)
