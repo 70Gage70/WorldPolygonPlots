@@ -83,7 +83,7 @@ NorthAmericaGDPTPTGeoPolygon=ReplaceRules[PGPOpts, myopts];
 (*File In*)
 
 
-fileIN="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamTPTparts.h5";
+fileIN="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/tptfromulamtest.h5";
 
 
 (* ::Subsection:: *)
@@ -93,7 +93,8 @@ fileIN="/Users/gagebonner/Desktop/Repositories/TransitionPathTheory.jl/src/ulamT
 PlotPolygon[fileIN,NorthAmericaGDPTPTPolygon]
 
 
-PlotPolygon[fileIN,ScalarDirectory->"parts_stat/spectral_P",NorthAmericaGDPPartitionsPolygon]
+PlotPolygon[fileIN,ScalarDirectory->"parts_stat/spectral_f",NorthAmericaGDPPartitionsPolygon]
+PlotPolygon[fileIN,ScalarDirectory->"parts_nonstat/spectral_P_plus",NorthAmericaGDPPartitionsPolygon]
 
 
 (* ::Subsection:: *)
